@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Qx.Services;
 
 [assembly: CLSCompliant(false)]
 [assembly: InternalsVisibleTo("Qx.Tests")]
@@ -43,6 +44,12 @@ internal sealed class Program
         {
             Description = "Disable web search"
         };
+        
+        var streamOption = new Option<bool>("--stream")
+        {
+            Description = "Stream the response"
+        };
+        streamOption.Aliases.Add("-s");
 
         // Add arguments and options to root command
         rootCommand.Arguments.Add(queryArgument);
@@ -50,6 +57,7 @@ internal sealed class Program
         rootCommand.Options.Add(searchContextOption);
         rootCommand.Options.Add(timeoutOption);
         rootCommand.Options.Add(noSearchOption);
+        rootCommand.Options.Add(streamOption);
 
         // Handler - using simple action
         rootCommand.SetAction((parseResult) =>
@@ -63,6 +71,7 @@ internal sealed class Program
                 timeout = 60;
             }
             bool noSearch = parseResult.GetValue(noSearchOption);
+            bool stream = parseResult.GetValue(streamOption);
 
             if (query.Length == 0)
             {
@@ -80,15 +89,50 @@ internal sealed class Program
                 return 3; // Authentication error
             }
 
-            // TODO: Implement OpenAI API integration
-            Console.WriteLine($"Query: {queryText}");
-            Console.WriteLine($"Effort: {effort}");
-            Console.WriteLine($"Context: {searchContext}");
-            Console.WriteLine($"Timeout: {timeout}s");
-            Console.WriteLine($"Web Search: {!noSearch}");
-            Console.WriteLine();
-            Console.WriteLine("Note: OpenAI API integration is not yet implemented.");
-            return 0;
+            // Create OpenAI service
+            var openAIService = new OpenAIService(apiKey);
+            
+            // Configure query options
+            var options = new QueryOptions
+            {
+                EffortLevel = effort,
+                ContextSize = searchContext,
+                TimeoutSeconds = timeout,
+                EnableWebSearch = !noSearch
+            };
+            
+            try
+            {
+                if (stream)
+                {
+                    // Stream the response
+                    IAsyncEnumerable<string> responseStream = openAIService.QueryStreamAsync(queryText, options);
+                    IAsyncEnumerator<string> enumerator = responseStream.GetAsyncEnumerator();
+                    
+                    while (enumerator.MoveNextAsync().AsTask().GetAwaiter().GetResult())
+                    {
+                        Console.Write(enumerator.Current);
+                    }
+                    Console.WriteLine();
+                }
+                else
+                {
+                    // Send query and display response
+                    string response = openAIService.QueryAsync(queryText, options).GetAwaiter().GetResult();
+                    Console.WriteLine(response);
+                }
+                return 0;
+            }
+            catch (TimeoutException ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+                return 124; // Timeout error code
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+                return 1; // General error
+            }
         });
 
         // Version command
