@@ -42,7 +42,13 @@ status: active
 
 ## 🚧 進行中項目
 
-*現在進行中のタスクはありません*
+### Phase 2: コア機能実装
+
+#### コマンド実装
+- [ ] QueryCommand クラス作成
+- [ ] ICommandHandler インターフェース定義
+- [ ] CommandHandler 実装
+- [ ] コマンド登録機構
 
 ## 📋 未着手項目（優先度順）
 
@@ -58,12 +64,13 @@ status: active
 
 ### Phase 2: コア機能実装 【Must】
 
-#### OpenAI API統合
-- [ ] OpenAI NuGetパッケージ追加
-- [ ] IOpenAIService インターフェース定義
-- [ ] OpenAIService 実装
-- [ ] APIキー管理実装（環境変数）
-- [ ] 基本的なクエリ送信機能
+#### OpenAI API統合 ✅ 完了（2025-08-12）
+- [x] OpenAI NuGetパッケージ追加
+- [x] IOpenAIService インターフェース定義
+- [x] OpenAIService 実装
+- [x] APIキー管理実装（環境変数）
+- [x] 基本的なクエリ送信機能
+- [x] ストリーミング対応実装
 
 #### コマンド実装
 - [ ] QueryCommand クラス作成
@@ -89,13 +96,13 @@ status: active
 - [ ] リトライ可能エラー判定
 - [ ] タイムアウト処理
 
-### Phase 2.5: ストリーミング対応 【Should】
+### Phase 2.5: ストリーミング対応 【Should】 ✅ 部分完了（2025-08-12）
 
 #### ストリーミング基盤
-- [ ] IAsyncEnumerable 対応
-- [ ] StreamHandler 実装
-- [ ] チャンク処理ロジック
-- [ ] バッファ管理
+- [x] IAsyncEnumerable 対応（OpenAIService.QueryStreamAsyncで実装）
+- [x] StreamHandler 実装（基本的なストリーミング機能）
+- [x] チャンク処理ロジック（テキストチャンクの逐次出力）
+- [ ] バッファ管理（詳細な最適化は未実装）
 
 #### 出力制御
 - [ ] IOutputFormatter インターフェース定義
