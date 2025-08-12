@@ -50,7 +50,11 @@ status: active
 
 残りのタスク:
 - [ ] VS Code 拡張機能セットアップ
-- [ ] テストヘルパー作成
+- [x] テストヘルパー作成（2025-08-12）
+  - ConsoleCapture: コンソール出力キャプチャ
+  - TestBase: テスト基底クラス
+  - MockFactory: モック生成ファクトリ
+  - TestConstants: テスト用定数定義
 
 ### Phase 2: コア機能実装 【Must】
 
