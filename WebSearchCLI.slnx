@@ -1,0 +1,5 @@
+<Project>
+  <Folder Name="/">
+    <Project Path="WebSearchCLI/WebSearchCLI.csproj" />
+  </Folder>
+</Project>
