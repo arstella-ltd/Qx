@@ -6,13 +6,15 @@ namespace Qx.Tests.Helpers;
 /// <summary>
 /// Factory for creating commonly used mock objects
 /// </summary>
-public static class MockFactory
+internal static class MockFactory
 {
     /// <summary>
     /// Create a mock environment with the specified variables
     /// </summary>
     public static IDisposable CreateMockEnvironment(Dictionary<string, string?> variables)
     {
+        ArgumentNullException.ThrowIfNull(variables);
+        
         var originalValues = new Dictionary<string, string?>();
         
         foreach (var kvp in variables)

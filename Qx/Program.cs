@@ -1,11 +1,13 @@
 ﻿using System.CommandLine;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 [assembly: CLSCompliant(false)]
+[assembly: InternalsVisibleTo("Qx.Tests")]
 
 namespace Qx;
 
-public sealed class Program
+internal sealed class Program
 {
     public static int Main(string[] args)
     {

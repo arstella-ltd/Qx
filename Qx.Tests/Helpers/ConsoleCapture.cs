@@ -5,7 +5,7 @@ namespace Qx.Tests.Helpers;
 /// <summary>
 /// Helper class to capture console output during tests
 /// </summary>
-public sealed class ConsoleCapture : IDisposable
+internal sealed class ConsoleCapture : IDisposable
 {
     private readonly TextWriter _originalOut;
     private readonly TextWriter _originalError;
@@ -48,6 +48,8 @@ public sealed class ConsoleCapture : IDisposable
     /// </summary>
     public static (string output, string error) Capture(Action action)
     {
+        ArgumentNullException.ThrowIfNull(action);
+        
         using var capture = new ConsoleCapture();
         action();
         return (capture.GetOutput(), capture.GetError());
@@ -58,8 +60,10 @@ public sealed class ConsoleCapture : IDisposable
     /// </summary>
     public static async Task<(string output, string error)> CaptureAsync(Func<Task> action)
     {
+        ArgumentNullException.ThrowIfNull(action);
+        
         using var capture = new ConsoleCapture();
-        await action();
+        await action().ConfigureAwait(false);
         return (capture.GetOutput(), capture.GetError());
     }
 

@@ -2,10 +2,10 @@ using Qx.Tests.Helpers;
 
 namespace Qx.Tests;
 
-public class ProgramTests : TestBase
+public sealed class ProgramTests : TestBase
 {
     [Fact]
-    public void Main_WithNoArguments_ShouldReturnZero()
+    public void MainWithNoArgumentsShouldReturnZero()
     {
         // Arrange
         string[] args = Array.Empty<string>();
@@ -18,7 +18,7 @@ public class ProgramTests : TestBase
     }
 
     [Fact]
-    public void Main_WithHelpOption_ShouldReturnZero()
+    public void MainWithHelpOptionShouldReturnZero()
     {
         // Arrange
         string[] args = new[] { "--help" };
@@ -31,7 +31,7 @@ public class ProgramTests : TestBase
     }
 
     [Fact]
-    public void Main_WithVersionCommand_ShouldReturnZero()
+    public void MainWithVersionCommandShouldReturnZero()
     {
         // Arrange
         string[] args = new[] { "version" };
@@ -44,7 +44,7 @@ public class ProgramTests : TestBase
     }
 
     [Fact]
-    public void Main_WithQuery_NoApiKey_ShouldReturnAuthenticationError()
+    public void MainWithQueryNoApiKeyShouldReturnAuthenticationError()
     {
         // Arrange
         string[] args = new[] { "test query" };
@@ -61,7 +61,7 @@ public class ProgramTests : TestBase
     [InlineData("--effort", "low")]
     [InlineData("--effort", "medium")]
     [InlineData("--effort", "high")]
-    public void Main_WithValidEffortOption_ShouldAcceptValue(string option, string value)
+    public void MainWithValidEffortOptionShouldAcceptValue(string option, string value)
     {
         // Arrange
         string[] args = new[] { "test query", option, value };
@@ -78,7 +78,7 @@ public class ProgramTests : TestBase
     [InlineData("--context", "low")]
     [InlineData("--context", "medium")]
     [InlineData("--context", "high")]
-    public void Main_WithValidContextOption_ShouldAcceptValue(string option, string value)
+    public void MainWithValidContextOptionShouldAcceptValue(string option, string value)
     {
         // Arrange
         string[] args = new[] { "test query", option, value };
@@ -92,7 +92,7 @@ public class ProgramTests : TestBase
     }
 
     [Fact]
-    public void Main_WithTimeoutOption_ShouldAcceptIntValue()
+    public void MainWithTimeoutOptionShouldAcceptIntValue()
     {
         // Arrange
         string[] args = new[] { "test query", "--timeout", "30" };
@@ -106,7 +106,7 @@ public class ProgramTests : TestBase
     }
 
     [Fact]
-    public void Main_WithNoSearchOption_ShouldAcceptFlag()
+    public void MainWithNoSearchOptionShouldAcceptFlag()
     {
         // Arrange
         string[] args = new[] { "test query", "--no-search" };
@@ -120,7 +120,7 @@ public class ProgramTests : TestBase
     }
 
     [Fact]
-    public void Main_WithMultipleOptions_ShouldAcceptAllValues()
+    public void MainWithMultipleOptionsShouldAcceptAllValues()
     {
         // Arrange
         string[] args = new[] 

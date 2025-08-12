@@ -3,7 +3,7 @@ namespace Qx.Tests.Helpers;
 /// <summary>
 /// Constants used across test classes
 /// </summary>
-public static class TestConstants
+internal static class TestConstants
 {
     /// <summary>
     /// Test API key for mocking
@@ -13,7 +13,7 @@ public static class TestConstants
     /// <summary>
     /// Test queries for various scenarios
     /// </summary>
-    public static class Queries
+    internal static class Queries
     {
         public const string Simple = "What is 2+2?";
         public const string Complex = "Explain quantum computing in simple terms";
@@ -27,7 +27,7 @@ public static class TestConstants
     /// <summary>
     /// Expected exit codes
     /// </summary>
-    public static class ExitCodes
+    internal static class ExitCodes
     {
         public const int Success = 0;
         public const int GeneralError = 1;
@@ -39,17 +39,17 @@ public static class TestConstants
     /// <summary>
     /// Timeout values for tests
     /// </summary>
-    public static class Timeouts
+    internal static class Timeouts
     {
-        public const int Short = 1;
+        public const int Brief = 1;
         public const int Default = 60;
-        public const int Long = 300;
+        public const int Extended = 300;
     }
 
     /// <summary>
     /// Effort levels
     /// </summary>
-    public static class EffortLevels
+    internal static class EffortLevels
     {
         public const string Low = "low";
         public const string Medium = "medium";
@@ -59,7 +59,7 @@ public static class TestConstants
     /// <summary>
     /// Context sizes
     /// </summary>
-    public static class ContextSizes
+    internal static class ContextSizes
     {
         public const string Low = "low";
         public const string Medium = "medium";
@@ -69,7 +69,7 @@ public static class TestConstants
     /// <summary>
     /// Sample responses for mocking
     /// </summary>
-    public static class SampleResponses
+    internal static class SampleResponses
     {
         public const string Simple = "The answer is 4.";
         public const string WithCode = @"Here's an example:

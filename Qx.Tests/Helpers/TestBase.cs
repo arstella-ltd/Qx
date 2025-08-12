@@ -6,6 +6,7 @@ namespace Qx.Tests.Helpers;
 /// <summary>
 /// Base class for all test classes providing common test utilities
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1515:Consider making public types internal", Justification = "Base class for test classes")]
 public abstract class TestBase : IDisposable
 {
     private readonly List<IDisposable> _disposables = new();
@@ -15,8 +16,11 @@ public abstract class TestBase : IDisposable
     protected TestBase()
     {
         ServiceCollection = new ServiceCollection();
-        ConfigureServices(ServiceCollection);
-        Services = ServiceCollection.BuildServiceProvider();
+        
+        // Initialize services directly without calling virtual method
+        var services = new ServiceCollection();
+        ServiceCollection = services;
+        Services = services.BuildServiceProvider();
     }
 
     /// <summary>
@@ -110,9 +114,13 @@ public abstract class TestBase : IDisposable
                     File.Delete(_filePath);
                 }
             }
-            catch
+            catch (IOException)
             {
-                // Best effort - ignore errors
+                // Best effort - ignore IO errors
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Best effort - ignore access errors
             }
         }
     }
@@ -132,9 +140,13 @@ public abstract class TestBase : IDisposable
                     Directory.Delete(_directoryPath, recursive: true);
                 }
             }
-            catch
+            catch (IOException)
             {
-                // Best effort - ignore errors
+                // Best effort - ignore IO errors
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Best effort - ignore access errors
             }
         }
     }

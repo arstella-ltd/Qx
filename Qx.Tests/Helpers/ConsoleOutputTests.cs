@@ -2,10 +2,10 @@ using Qx.Tests.Helpers;
 
 namespace Qx.Tests.Helpers;
 
-public class ConsoleOutputTests
+public sealed class ConsoleOutputTests
 {
     [Fact]
-    public void ConsoleCapture_ShouldCaptureStandardOutput()
+    public void ConsoleCaptureShouldCaptureStandardOutput()
     {
         // Arrange & Act
         var (output, error) = ConsoleCapture.Capture(() =>
@@ -21,7 +21,7 @@ public class ConsoleOutputTests
     }
 
     [Fact]
-    public void ConsoleCapture_ShouldCaptureErrorOutput()
+    public void ConsoleCaptureShouldCaptureErrorOutput()
     {
         // Arrange & Act
         var (output, error) = ConsoleCapture.Capture(() =>
@@ -37,13 +37,13 @@ public class ConsoleOutputTests
     }
 
     [Fact]
-    public async Task ConsoleCapture_ShouldCaptureAsyncOutput()
+    public async Task ConsoleCaptureShouldCaptureAsyncOutput()
     {
         // Arrange & Act
         var (output, error) = await ConsoleCapture.CaptureAsync(async () =>
         {
-            await Console.Out.WriteLineAsync("Async output");
-            await Console.Error.WriteLineAsync("Async error");
+            await Console.Out.WriteLineAsync("Async output").ConfigureAwait(false);
+            await Console.Error.WriteLineAsync("Async error").ConfigureAwait(false);
         });
 
         // Assert
@@ -52,7 +52,7 @@ public class ConsoleOutputTests
     }
 
     [Fact]
-    public void ConsoleCapture_ShouldRestoreOriginalConsoleAfterDispose()
+    public void ConsoleCaptureShouldRestoreOriginalConsoleAfterDispose()
     {
         // Arrange
         var originalOut = Console.Out;
@@ -71,7 +71,8 @@ public class ConsoleOutputTests
     }
 
     [Fact]
-    public void ConsoleCapture_Clear_ShouldResetCapturedContent()
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Test literal")]
+    public void ConsoleCaptureClearShouldResetCapturedContent()
     {
         // Arrange
         using var capture = new ConsoleCapture();
