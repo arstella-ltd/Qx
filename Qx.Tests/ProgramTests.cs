@@ -1,72 +1,74 @@
+using Qx.Tests.Helpers;
+
 namespace Qx.Tests;
 
-public class ProgramTests
+public class ProgramTests : TestBase
 {
     [Fact]
-    public async Task Main_WithNoArguments_ShouldReturnZero()
+    public void Main_WithNoArguments_ShouldReturnZero()
     {
         // Arrange
-        var args = new string[] { };
+        string[] args = Array.Empty<string>();
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
         result.Should().Be(0);
     }
 
     [Fact]
-    public async Task Main_WithHelpOption_ShouldReturnZero()
+    public void Main_WithHelpOption_ShouldReturnZero()
     {
         // Arrange
-        var args = new[] { "--help" };
+        string[] args = new[] { "--help" };
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
         result.Should().Be(0);
     }
 
     [Fact]
-    public async Task Main_WithVersionCommand_ShouldReturnZero()
+    public void Main_WithVersionCommand_ShouldReturnZero()
     {
         // Arrange
-        var args = new[] { "version" };
+        string[] args = new[] { "version" };
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
         result.Should().Be(0);
     }
 
     [Fact]
-    public async Task Main_WithQuery_NoApiKey_ShouldReturnAuthenticationError()
+    public void Main_WithQuery_NoApiKey_ShouldReturnAuthenticationError()
     {
         // Arrange
-        var args = new[] { "test query" };
-        Environment.SetEnvironmentVariable("OPENAI_API_KEY", null);
+        string[] args = new[] { "test query" };
+        SetEnvironmentVariable("OPENAI_API_KEY", null);
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
-        result.Should().Be(3); // Authentication error code
+        result.Should().Be(TestConstants.ExitCodes.AuthenticationError);
     }
 
     [Theory]
     [InlineData("--effort", "low")]
     [InlineData("--effort", "medium")]
     [InlineData("--effort", "high")]
-    public async Task Main_WithValidEffortOption_ShouldAcceptValue(string option, string value)
+    public void Main_WithValidEffortOption_ShouldAcceptValue(string option, string value)
     {
         // Arrange
-        var args = new[] { "test query", option, value };
-        Environment.SetEnvironmentVariable("OPENAI_API_KEY", "test-key");
+        string[] args = new[] { "test query", option, value };
+        SetEnvironmentVariable("OPENAI_API_KEY", TestConstants.TestApiKey);
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
         result.Should().Be(0); // Currently returns 0 as OpenAI integration is not implemented
@@ -76,52 +78,52 @@ public class ProgramTests
     [InlineData("--context", "low")]
     [InlineData("--context", "medium")]
     [InlineData("--context", "high")]
-    public async Task Main_WithValidContextOption_ShouldAcceptValue(string option, string value)
+    public void Main_WithValidContextOption_ShouldAcceptValue(string option, string value)
     {
         // Arrange
-        var args = new[] { "test query", option, value };
-        Environment.SetEnvironmentVariable("OPENAI_API_KEY", "test-key");
+        string[] args = new[] { "test query", option, value };
+        SetEnvironmentVariable("OPENAI_API_KEY", TestConstants.TestApiKey);
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
         result.Should().Be(0);
     }
 
     [Fact]
-    public async Task Main_WithTimeoutOption_ShouldAcceptIntValue()
+    public void Main_WithTimeoutOption_ShouldAcceptIntValue()
     {
         // Arrange
-        var args = new[] { "test query", "--timeout", "30" };
-        Environment.SetEnvironmentVariable("OPENAI_API_KEY", "test-key");
+        string[] args = new[] { "test query", "--timeout", "30" };
+        SetEnvironmentVariable("OPENAI_API_KEY", TestConstants.TestApiKey);
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
         result.Should().Be(0);
     }
 
     [Fact]
-    public async Task Main_WithNoSearchOption_ShouldAcceptFlag()
+    public void Main_WithNoSearchOption_ShouldAcceptFlag()
     {
         // Arrange
-        var args = new[] { "test query", "--no-search" };
-        Environment.SetEnvironmentVariable("OPENAI_API_KEY", "test-key");
+        string[] args = new[] { "test query", "--no-search" };
+        SetEnvironmentVariable("OPENAI_API_KEY", TestConstants.TestApiKey);
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
         result.Should().Be(0);
     }
 
     [Fact]
-    public async Task Main_WithMultipleOptions_ShouldAcceptAllValues()
+    public void Main_WithMultipleOptions_ShouldAcceptAllValues()
     {
         // Arrange
-        var args = new[] 
+        string[] args = new[] 
         { 
             "test query with multiple words",
             "--effort", "high",
@@ -129,10 +131,10 @@ public class ProgramTests
             "--timeout", "120",
             "--no-search"
         };
-        Environment.SetEnvironmentVariable("OPENAI_API_KEY", "test-key");
+        SetEnvironmentVariable("OPENAI_API_KEY", TestConstants.TestApiKey);
 
         // Act
-        var result = await Program.Main(args);
+        int result = Program.Main(args);
 
         // Assert
         result.Should().Be(0);

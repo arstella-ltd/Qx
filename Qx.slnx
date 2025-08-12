@@ -1,6 +1,0 @@
-<Project>
-  <Folder Name="/">
-    <Project Path="Qx/Qx.csproj" />
-    <Project Path="Qx.Tests/Qx.Tests.csproj" />
-  </Folder>
-</Project>
