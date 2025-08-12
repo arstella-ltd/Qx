@@ -1,5 +1,6 @@
 <Project>
   <Folder Name="/">
-    <Project Path="WebSearchCLI/WebSearchCLI.csproj" />
+    <Project Path="Qx/Qx.csproj" />
+    <Project Path="Qx.Tests/Qx.Tests.csproj" />
   </Folder>
 </Project>

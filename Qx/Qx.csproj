@@ -7,6 +7,28 @@
     <Nullable>enable</Nullable>
     <AssemblyName>qx</AssemblyName>
     <RootNamespace>Qx</RootNamespace>
+    
+    <!-- AoT設定 -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <TrimMode>full</TrimMode>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <StripSymbols>true</StripSymbols>
+    
+    <!-- AoT/Trim互換性チェック -->
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="OpenAI" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
 
 </Project>
