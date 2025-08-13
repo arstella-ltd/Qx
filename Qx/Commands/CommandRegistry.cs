@@ -9,6 +9,7 @@ namespace Qx.Commands;
 internal static class CommandRegistry
 {
     private static readonly string[] ValidSearchContextSizes = { "low", "medium", "high" };
+    private static readonly string[] ValidReasoningEfforts = { "low", "medium", "high" };
 
     public static RootCommand CreateRootCommand(IServiceProvider serviceProvider)
     {
@@ -76,6 +77,12 @@ internal static class CommandRegistry
         };
         searchContextSizeOption.Aliases.Add("-s");
 
+        var reasoningEffortOption = new Option<string>("--reasoning-effort")
+        {
+            Description = "Reasoning effort level for response generation (low, medium, high)"
+        };
+        reasoningEffortOption.Aliases.Add("-r");
+
         var verboseOption = new Option<bool>("--verbose")
         {
             Description = "Show detailed response information in JSON format"
@@ -101,6 +108,7 @@ internal static class CommandRegistry
         rootCommand.Options.Add(webSearchOption);
         rootCommand.Options.Add(noWebSearchOption);
         rootCommand.Options.Add(searchContextSizeOption);
+        rootCommand.Options.Add(reasoningEffortOption);
         rootCommand.Options.Add(functionsOption);
         rootCommand.Options.Add(noFunctionsOption);
         rootCommand.Options.Add(verboseOption);
@@ -194,6 +202,7 @@ internal static class CommandRegistry
                 Console.WriteLine("  -w, --web-search             Enable web search for more comprehensive answers [default: enabled]");
                 Console.WriteLine("  --no-web-search              Disable web search (use model knowledge only)");
                 Console.WriteLine("  -s, --search-context-size <size>  Context size for web search (low, medium, high) [default: medium]");
+                Console.WriteLine("  -r, --reasoning-effort <effort>  Reasoning effort level (low, medium, high)");
                 Console.WriteLine("  -f, --functions              Enable function calling (GetCurrentTime, GetWeather, CalculateExpression) [default: enabled]");
                 Console.WriteLine("  --no-functions               Disable function calling");
                 Console.WriteLine("  -v, --verbose                Show detailed response information in JSON format");
@@ -229,11 +238,19 @@ internal static class CommandRegistry
 
             bool verbose = parseResult.GetValue(verboseOption);
             string? searchContextSize = parseResult.GetValue(searchContextSizeOption);
+            string? reasoningEffort = parseResult.GetValue(reasoningEffortOption);
 
             // Validate search context size
             if (!string.IsNullOrEmpty(searchContextSize) && !ValidSearchContextSizes.Contains(searchContextSize))
             {
                 Console.Error.WriteLine($"Error: Invalid search-context-size value '{searchContextSize}'. Must be 'low', 'medium', or 'high'.");
+                return 1;
+            }
+
+            // Validate reasoning effort
+            if (!string.IsNullOrEmpty(reasoningEffort) && !ValidReasoningEfforts.Contains(reasoningEffort))
+            {
+                Console.Error.WriteLine($"Error: Invalid reasoning-effort value '{reasoningEffort}'. Must be 'low', 'medium', or 'high'.");
                 return 1;
             }
 
@@ -247,7 +264,8 @@ internal static class CommandRegistry
                 enableWebSearch,
                 enableFunctionCalling,
                 verbose,
-                searchContextSize).ConfigureAwait(false)
+                searchContextSize,
+                reasoningEffort).ConfigureAwait(false)
             ).GetAwaiter().GetResult();
 
             return 0;
