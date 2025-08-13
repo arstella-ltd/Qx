@@ -115,9 +115,6 @@ internal static class CommandRegistry
                 var licenses = Task.Run(async () => await licenseHelper.GetLicenseInfoAsync().ConfigureAwait(false)).GetAwaiter().GetResult();
 
                 // Display main license info
-                Console.WriteLine("\n========================================");
-                Console.WriteLine("License Information");
-                Console.WriteLine("========================================");
                 Console.WriteLine($"\n{licenses["Qx"].Name} - {licenses["Qx"].License.Split('\n')[0]}");
                 Console.WriteLine("Copyright (c) 2025 Arstella Ltd.");
                 Console.WriteLine();
