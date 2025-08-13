@@ -48,7 +48,7 @@ internal sealed class QueryCommand : Command
         this.SetAction((parseResult) =>
         {
             string[] prompt = parseResult.GetValue(promptArgument) ?? Array.Empty<string>();
-            string model = parseResult.GetValue(modelOption) ?? "gpt-5";
+            string model = parseResult.GetValue(modelOption) ?? "gpt-5-nano";
             string? output = parseResult.GetValue(outputOption);
             double temperature = parseResult.GetValue(temperatureOption);
             if (temperature == 0)

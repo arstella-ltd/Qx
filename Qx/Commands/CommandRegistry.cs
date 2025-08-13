@@ -111,7 +111,7 @@ internal static class CommandRegistry
                 Console.WriteLine("\nArguments:");
                 Console.WriteLine("  <prompt>  The natural language prompt to send");
                 Console.WriteLine("\nOptions:");
-                Console.WriteLine("  -m, --model <model>          The AI model to use [default: gpt-5]");
+                Console.WriteLine("  -m, --model <model>          The AI model to use [default: gpt-5-nano]");
                 Console.WriteLine("  -o, --output <output>        Output file path");
                 Console.WriteLine("  -t, --temperature <temperature>  Temperature for response generation (0.0 to 2.0) [default: 1]");
                 Console.WriteLine("  --max-tokens <max-tokens>    Maximum number of tokens in the response (unlimited if not specified)");
@@ -126,7 +126,7 @@ internal static class CommandRegistry
             }
             
             // Execute the query
-            string model = parseResult.GetValue(modelOption) ?? "gpt-5";
+            string model = parseResult.GetValue(modelOption) ?? "gpt-5-nano";
             string? output = parseResult.GetValue(outputOption);
             double temperature = parseResult.GetValue(temperatureOption);
             if (temperature == 0)
