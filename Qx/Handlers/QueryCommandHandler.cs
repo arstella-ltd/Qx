@@ -27,18 +27,22 @@ internal sealed class QueryCommandHandler
 
         try
         {
-            await Console.Out.WriteLineAsync($"Processing query with model: {model}").ConfigureAwait(false);
-            string maxTokensDisplay = maxTokens.HasValue ? maxTokens.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "unlimited";
-            await Console.Out.WriteLineAsync($"Temperature: {temperature}, Max tokens: {maxTokensDisplay}").ConfigureAwait(false);
-            if (enableWebSearch)
+            // Only show verbose information if requested
+            if (verbose)
             {
-                await Console.Out.WriteLineAsync("Web search: Enabled (Note: Not all models support web search)").ConfigureAwait(false);
+                await Console.Out.WriteLineAsync($"Processing query with model: {model}").ConfigureAwait(false);
+                string maxTokensDisplay = maxTokens.HasValue ? maxTokens.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "unlimited";
+                await Console.Out.WriteLineAsync($"Temperature: {temperature}, Max tokens: {maxTokensDisplay}").ConfigureAwait(false);
+                if (enableWebSearch)
+                {
+                    await Console.Out.WriteLineAsync("Web search: Enabled (Note: Not all models support web search)").ConfigureAwait(false);
+                }
+                if (enableFunctionCalling)
+                {
+                    await Console.Out.WriteLineAsync("Function calling: Enabled (GetCurrentTime, GetWeather, CalculateExpression)").ConfigureAwait(false);
+                }
+                await Console.Out.WriteLineAsync().ConfigureAwait(false);
             }
-            if (enableFunctionCalling)
-            {
-                await Console.Out.WriteLineAsync("Function calling: Enabled (GetCurrentTime, GetWeather, CalculateExpression)").ConfigureAwait(false);
-            }
-            await Console.Out.WriteLineAsync().ConfigureAwait(false);
 
             // Get response with optional verbose details
             var (response, responseDetails) = await _openAIService.GetCompletionWithDetailsAsync(
@@ -66,7 +70,11 @@ internal sealed class QueryCommandHandler
             }
             else
             {
-                await Console.Out.WriteLineAsync("Response:").ConfigureAwait(false);
+                // Only show "Response:" label in verbose mode
+                if (verbose)
+                {
+                    await Console.Out.WriteLineAsync("Response:").ConfigureAwait(false);
+                }
                 await Console.Out.WriteLineAsync(response).ConfigureAwait(false);
             }
 
