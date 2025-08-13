@@ -55,6 +55,17 @@ internal static class CommandRegistry
             Description = "Disable web search (use model knowledge only)"
         };
         
+        var functionsOption = new Option<bool>("--functions")
+        {
+            Description = "Enable function calling (GetCurrentTime, GetWeather, CalculateExpression)"
+        };
+        functionsOption.Aliases.Add("-f");
+        
+        var noFunctionsOption = new Option<bool>("--no-functions")
+        {
+            Description = "Disable function calling"
+        };
+        
         var verboseOption = new Option<bool>("--verbose")
         {
             Description = "Show detailed response information in JSON format"
@@ -74,6 +85,8 @@ internal static class CommandRegistry
         rootCommand.Options.Add(maxTokensOption);
         rootCommand.Options.Add(webSearchOption);
         rootCommand.Options.Add(noWebSearchOption);
+        rootCommand.Options.Add(functionsOption);
+        rootCommand.Options.Add(noFunctionsOption);
         rootCommand.Options.Add(verboseOption);
         rootCommand.Options.Add(versionOption);
         
@@ -104,6 +117,8 @@ internal static class CommandRegistry
                 Console.WriteLine("  --max-tokens <max-tokens>    Maximum number of tokens in the response (unlimited if not specified)");
                 Console.WriteLine("  -w, --web-search             Enable web search for more comprehensive answers [default: enabled]");
                 Console.WriteLine("  --no-web-search              Disable web search (use model knowledge only)");
+                Console.WriteLine("  -f, --functions              Enable function calling (GetCurrentTime, GetWeather, CalculateExpression) [default: enabled]");
+                Console.WriteLine("  --no-functions               Disable function calling");
                 Console.WriteLine("  -v, --verbose                Show detailed response information in JSON format");
                 Console.WriteLine("  --version                    Show version information");
                 Console.WriteLine("  -h, --help                   Show help and usage information");
@@ -127,6 +142,13 @@ internal static class CommandRegistry
                 enableWebSearch = true;
             }
             
+            // Determine function calling setting
+            bool enableFunctionCalling = !parseResult.GetValue(noFunctionsOption);
+            if (parseResult.GetValue(functionsOption))
+            {
+                enableFunctionCalling = true;
+            }
+            
             bool verbose = parseResult.GetValue(verboseOption);
             
             var handler = new QueryCommandHandler(openAIService);
@@ -137,6 +159,7 @@ internal static class CommandRegistry
                 temperature, 
                 maxTokens,
                 enableWebSearch,
+                enableFunctionCalling,
                 verbose).ConfigureAwait(false)
             ).GetAwaiter().GetResult();
             

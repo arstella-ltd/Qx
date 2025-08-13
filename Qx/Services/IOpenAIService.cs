@@ -31,8 +31,9 @@ internal interface IOpenAIService
     /// <param name="temperature">Temperature for response generation</param>
     /// <param name="maxTokens">Maximum tokens for the response</param>
     /// <param name="enableWebSearch">Whether to enable web search tool</param>
+    /// <param name="enableFunctionCalling">Whether to enable function calling</param>
     /// <returns>The response from OpenAI</returns>
-    Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false);
+    Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false);
     
     /// <summary>
     /// Get a completion from OpenAI with detailed response information
@@ -42,8 +43,9 @@ internal interface IOpenAIService
     /// <param name="temperature">Temperature for response generation</param>
     /// <param name="maxTokens">Maximum tokens for the response</param>
     /// <param name="enableWebSearch">Whether to enable web search tool</param>
+    /// <param name="enableFunctionCalling">Whether to enable function calling</param>
     /// <returns>A tuple of response text and detailed response object</returns>
-    Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false);
+    Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false);
 }
 
 /// <summary>

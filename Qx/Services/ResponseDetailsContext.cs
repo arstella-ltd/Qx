@@ -40,6 +40,7 @@ internal sealed class ItemInfo
     public string Type { get; set; } = string.Empty;
     public ContentInfo? Content { get; set; }
     public string? WebSearchStatus { get; set; }
+    public string? FunctionName { get; set; }
 }
 
 internal sealed class ContentInfo

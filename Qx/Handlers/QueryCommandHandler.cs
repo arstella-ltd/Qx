@@ -15,7 +15,7 @@ internal sealed class QueryCommandHandler
         _openAIService = openAIService ?? throw new ArgumentNullException(nameof(openAIService));
     }
 
-    public async Task<int> HandleAsync(string[] promptParts, string model, string? outputPath, double temperature, int? maxTokens, bool enableWebSearch = true, bool verbose = false)
+    public async Task<int> HandleAsync(string[] promptParts, string model, string? outputPath, double temperature, int? maxTokens, bool enableWebSearch = true, bool enableFunctionCalling = true, bool verbose = false)
     {
         string prompt = string.Join(" ", promptParts ?? Array.Empty<string>());
 
@@ -34,6 +34,10 @@ internal sealed class QueryCommandHandler
             {
                 await Console.Out.WriteLineAsync("Web search: Enabled (Note: Not all models support web search)").ConfigureAwait(false);
             }
+            if (enableFunctionCalling)
+            {
+                await Console.Out.WriteLineAsync("Function calling: Enabled (GetCurrentTime, GetWeather, CalculateExpression)").ConfigureAwait(false);
+            }
             await Console.Out.WriteLineAsync().ConfigureAwait(false);
 
             // Get response with optional verbose details
@@ -42,7 +46,8 @@ internal sealed class QueryCommandHandler
                 model, 
                 temperature, 
                 maxTokens,
-                enableWebSearch).ConfigureAwait(false);
+                enableWebSearch,
+                enableFunctionCalling).ConfigureAwait(false);
             
             // Show verbose output if requested
             if (verbose && responseDetails != null)

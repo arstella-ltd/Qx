@@ -15,6 +15,7 @@ internal sealed class OpenAIService : IOpenAIService
 {
     private readonly ChatClient _chatClient;
     private readonly string _apiKey;
+    private readonly ToolService _toolService;
 
     /// <summary>
     /// Initialize a new instance of OpenAIService
@@ -24,6 +25,7 @@ internal sealed class OpenAIService : IOpenAIService
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
         _apiKey = apiKey;
+        _toolService = new ToolService();
         
         // Create OpenAI client with the API key
         var openAIClient = new OpenAIClient(apiKey);
@@ -176,15 +178,15 @@ internal sealed class OpenAIService : IOpenAIService
     /// Get a completion from OpenAI with specific parameters
     /// </summary>
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only
-    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false)
+    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
         ArgumentException.ThrowIfNullOrWhiteSpace(model);
 
-        // Use OpenAIResponseClient for web search support
-        // Note: Web search works best with specific models like gpt-4o-mini
-        // For other models, we'll fallback to regular chat if web search fails
-        if (enableWebSearch && (model.Contains("gpt-4o", StringComparison.OrdinalIgnoreCase) || model.Contains("o1", StringComparison.OrdinalIgnoreCase)))
+        // Use OpenAIResponseClient for web search or function calling support
+        // Note: Web search and function calling work best with specific models like gpt-4o-mini
+        // For other models, we'll fallback to regular chat if these features fail
+        if ((enableWebSearch || enableFunctionCalling) && (model.Contains("gpt-4o", StringComparison.OrdinalIgnoreCase) || model.Contains("o1", StringComparison.OrdinalIgnoreCase)))
         {
             var responseClient = new OpenAIResponseClient(
                 model: model,
@@ -197,7 +199,19 @@ internal sealed class OpenAIService : IOpenAIService
             };
 
             // Add web search tool
-            options.Tools.Add(ResponseTool.CreateWebSearchTool());
+            if (enableWebSearch)
+            {
+                options.Tools.Add(ResponseTool.CreateWebSearchTool());
+            }
+            
+            // Add function calling tools
+            if (enableFunctionCalling)
+            {
+                foreach (var tool in _toolService.GetAvailableTools())
+                {
+                    options.Tools.Add(tool);
+                }
+            }
 
             var response = await responseClient.CreateResponseAsync(
                 userInputText: prompt,
@@ -243,6 +257,14 @@ internal sealed class OpenAIService : IOpenAIService
                     // Note: Some models may only return WebSearchCallResponseItems without message content
                     // This might be a limitation of certain models with web search
                     debugInfo.AppendLine($"[Web search: {webSearchItem.Status}]");
+                }
+                else if (item is FunctionCallResponseItem functionItem)
+                {
+                    // Execute the function and append the result
+                    string functionResult = _toolService.ExecuteFunction(functionItem.FunctionName, functionItem.FunctionArguments);
+                    resultText.AppendLine($"\n[Function Call: {functionItem.FunctionName}]");
+                    resultText.AppendLine(functionResult);
+                    hasTextContent = true;
                 }
                 else
                 {
@@ -293,15 +315,15 @@ internal sealed class OpenAIService : IOpenAIService
     /// Get a completion from OpenAI with detailed response information
     /// </summary>
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only
-    public async Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false)
+    public async Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
         ArgumentException.ThrowIfNullOrWhiteSpace(model);
 
-        // Use OpenAIResponseClient for web search support
-        // Note: Web search works best with specific models like gpt-4o-mini
-        // For other models, we'll fallback to regular chat if web search fails
-        if (enableWebSearch && (model.Contains("gpt-4o", StringComparison.OrdinalIgnoreCase) || model.Contains("o1", StringComparison.OrdinalIgnoreCase)))
+        // Use OpenAIResponseClient for web search or function calling support
+        // Note: Web search and function calling work best with specific models like gpt-4o-mini
+        // For other models, we'll fallback to regular chat if these features fail
+        if ((enableWebSearch || enableFunctionCalling) && (model.Contains("gpt-4o", StringComparison.OrdinalIgnoreCase) || model.Contains("o1", StringComparison.OrdinalIgnoreCase)))
         {
             var responseClient = new OpenAIResponseClient(
                 model: model,
@@ -314,7 +336,19 @@ internal sealed class OpenAIService : IOpenAIService
             };
 
             // Add web search tool
-            options.Tools.Add(ResponseTool.CreateWebSearchTool());
+            if (enableWebSearch)
+            {
+                options.Tools.Add(ResponseTool.CreateWebSearchTool());
+            }
+            
+            // Add function calling tools
+            if (enableFunctionCalling)
+            {
+                foreach (var tool in _toolService.GetAvailableTools())
+                {
+                    options.Tools.Add(tool);
+                }
+            }
 
             var response = await responseClient.CreateResponseAsync(
                 userInputText: prompt,
@@ -341,7 +375,8 @@ internal sealed class OpenAIService : IOpenAIService
                             ContentCount = msg.Content?.Count ?? 0,
                             TextPreviews = msg.Content?.Select(c => c.Text?.Length > 100 ? c.Text[..100] + "..." : c.Text).ToList()
                         } : null,
-                        WebSearchStatus = item is WebSearchCallResponseItem ws ? ws.Status?.ToString() : null
+                        WebSearchStatus = item is WebSearchCallResponseItem ws ? ws.Status?.ToString() : null,
+                        FunctionName = item is FunctionCallResponseItem fc ? fc.FunctionName : null
                     }).ToList()
                 }
             };
@@ -365,6 +400,14 @@ internal sealed class OpenAIService : IOpenAIService
                             }
                         }
                     }
+                }
+                else if (item is FunctionCallResponseItem functionItem)
+                {
+                    // Execute the function and append the result
+                    string functionResult = _toolService.ExecuteFunction(functionItem.FunctionName, functionItem.FunctionArguments);
+                    resultText.AppendLine($"\n[Function Call: {functionItem.FunctionName}]");
+                    resultText.AppendLine(functionResult);
+                    hasTextContent = true;
                 }
             }
             
