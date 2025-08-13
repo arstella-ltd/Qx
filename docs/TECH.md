@@ -1,10 +1,10 @@
 # Qx 技術仕様書
 
 ---
-version: 1.0.0
-last_updated: 2025-08-12
+version: 1.1.0
+last_updated: 2025-08-13
 author: Development Team
-status: draft
+status: approved
 ---
 
 ## 🛠️ 技術スタック
@@ -67,6 +67,10 @@ dotnet run -- "your query here"
 | 変数名 | 必須 | 説明 | デフォルト |
 |--------|------|------|------------|
 | OPENAI_API_KEY | ✅ | OpenAI APIキー | なし |
+| QX_MODEL | ❌ | デフォルトモデル | gpt-5-nano |
+| QX_TEMPERATURE | ❌ | デフォルト温度 | 1.0 |
+| QX_MAX_TOKENS | ❌ | デフォルト最大トークン | なし |
+| QX_VERBOSE | ❌ | 詳細出力モード | false |
 | QX_TIMEOUT | ❌ | APIタイムアウト（秒） | 60 |
 | QX_DEBUG | ❌ | デバッグモード | false |
 

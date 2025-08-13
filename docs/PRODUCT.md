@@ -1,9 +1,10 @@
 # Qx (Query eXpress) 製品概要書
 
 ---
-version: 1.1.0
-last_updated: 2025-08-12
-status: draft
+version: 1.2.0
+last_updated: 2025-08-13
+author: Development Team
+status: approved
 ---
 
 ## 📌 概要

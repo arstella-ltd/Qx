@@ -1,5 +1,12 @@
 # Qx 使用例集
 
+---
+version: 1.1.0
+last_updated: 2025-08-13
+author: Development Team  
+status: approved
+---
+
 ## 基本的な使い方
 
 ### シンプルな質問
@@ -7,15 +14,14 @@
 qx "What is 2+2?"
 # 出力: 4
 
-qx "今日の天気は？"
-# 出力: [Function Call: GetCurrentTime] ...
+qx "今の時間は？"
+# 出力: Current time in UTC: 2025-08-13 12:00:00
 ```
 
 ### 計算機能の使用
 ```bash
 qx "Calculate 123 * 456"
-# 出力: [Function Call: CalculateExpression]
-#       Result: 56088
+# 出力: Result: 56088
 
 qx "10の階乗を計算して"
 # 出力: 3628800
@@ -27,8 +33,7 @@ qx "10の階乗を計算して"
 ```bash
 # シンプルな例
 echo "What is the current time in Tokyo?" | qx
-# 出力: [Function Call: GetCurrentTime]
-#       Current time in JST: 2025-08-13 15:19:36
+# 出力: Current time in JST: 2025-08-13 15:19:36
 
 # ファイルの内容を解析
 cat README.md | qx "このドキュメントを要約して"
@@ -102,6 +107,14 @@ qx "What is 2+2?" --verbose
 #       === Response Text ===
 #       Response:
 #       4
+
+# 関数呼び出しを含む場合
+qx "What time is it?" --verbose
+# 出力: ...
+#       === Response Text ===
+#       Response:
+#       [Function Call: GetCurrentTime]
+#       Current time in UTC: 2025-08-13 12:00:00
 ```
 
 ### Web検索の有効/無効
@@ -198,6 +211,7 @@ echo "Pythonでフィボナッチ数列" | qx --no-web-search --temperature 0.2
 
 # 関数呼び出しを有効にし、結果を簡潔に
 qx "東京の天気は？" --functions --max-tokens 50
+# 出力: Weather in Tokyo, Japan: Clear, 20°C
 ```
 
 ## パイプラインでの使用
