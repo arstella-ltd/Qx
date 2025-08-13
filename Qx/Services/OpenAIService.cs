@@ -181,7 +181,9 @@ internal sealed class OpenAIService : IOpenAIService
         ArgumentException.ThrowIfNullOrWhiteSpace(model);
 
         // Use OpenAIResponseClient for web search support
-        if (enableWebSearch)
+        // Note: Web search works best with specific models like gpt-4o-mini
+        // For other models, we'll fallback to regular chat if web search fails
+        if (enableWebSearch && (model.Contains("gpt-4o", StringComparison.OrdinalIgnoreCase) || model.Contains("o1", StringComparison.OrdinalIgnoreCase)))
         {
             var responseClient = new OpenAIResponseClient(
                 model: model,
@@ -210,26 +212,52 @@ internal sealed class OpenAIService : IOpenAIService
                 return "No response generated. Web search may not be available for this model.";
             }
             
+            bool hasTextContent = false;
+            var debugInfo = new System.Text.StringBuilder();
+            
             foreach (ResponseItem item in response.Value.OutputItems)
             {
                 if (item is MessageResponseItem messageItem)
                 {
-                    if (messageItem.Content != null)
+                    // MessageResponseItem should have Content property with TextContent items
+                    if (messageItem.Content != null && messageItem.Content.Count > 0)
                     {
-                        foreach (var content in messageItem.Content)
+                        foreach (var contentItem in messageItem.Content)
                         {
-                            if (!string.IsNullOrEmpty(content.Text))
+                            if (contentItem?.Text != null)
                             {
-                                resultText.Append(content.Text);
+                                resultText.Append(contentItem.Text);
+                                hasTextContent = true;
                             }
                         }
+                    }
+                    else
+                    {
+                        // Debug: log if content is null or empty
+                        debugInfo.AppendLine($"[Debug: MessageItem with null/empty content]");
                     }
                 }
                 else if (item is WebSearchCallResponseItem webSearchItem)
                 {
-                    // Indicate that web search was performed
-                    resultText.AppendLine($"[Web search performed: {webSearchItem.Status}]");
+                    // Note: Some models may only return WebSearchCallResponseItems without message content
+                    // This might be a limitation of certain models with web search
+                    debugInfo.AppendLine($"[Web search: {webSearchItem.Status}]");
                 }
+                else
+                {
+                    // Debug: log unknown item types
+                    debugInfo.AppendLine($"[Debug: Unknown item type: {item?.GetType().Name}]");
+                }
+            }
+            
+            // If we got no text content, return what we have or an error message
+            if (!hasTextContent)
+            {
+                if (debugInfo.Length > 0)
+                {
+                    return $"Web search was attempted but no text response was generated. Try using --model gpt-4o-mini for web search, or --no-web-search for this model.\nDebug: {debugInfo}";
+                }
+                return "No response content available.";
             }
 
             string result = resultText.ToString();

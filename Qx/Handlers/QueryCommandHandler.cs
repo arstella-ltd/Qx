@@ -30,7 +30,7 @@ internal sealed class QueryCommandHandler
             await Console.Out.WriteLineAsync($"Temperature: {temperature}, Max tokens: {maxTokens}").ConfigureAwait(false);
             if (enableWebSearch)
             {
-                await Console.Out.WriteLineAsync("Web search: Enabled").ConfigureAwait(false);
+                await Console.Out.WriteLineAsync("Web search: Enabled (Note: Not all models support web search)").ConfigureAwait(false);
             }
             await Console.Out.WriteLineAsync().ConfigureAwait(false);
 
