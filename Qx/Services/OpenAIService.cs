@@ -149,6 +149,32 @@ internal sealed class OpenAIService : IOpenAIService
     }
 
     /// <summary>
+    /// Get a completion from OpenAI with specific parameters
+    /// </summary>
+    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int maxTokens)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
+        ArgumentException.ThrowIfNullOrWhiteSpace(model);
+
+        var openAIClient = new OpenAIClient(_apiKey);
+        var chatClient = openAIClient.GetChatClient(model);
+
+        var messages = new List<ChatMessage>
+        {
+            new UserChatMessage(prompt)
+        };
+
+        var chatOptions = new ChatCompletionOptions
+        {
+            Temperature = (float)temperature,
+            MaxOutputTokenCount = maxTokens
+        };
+
+        var completion = await chatClient.CompleteChatAsync(messages, chatOptions).ConfigureAwait(false);
+        return completion.Value.Content[0].Text ?? string.Empty;
+    }
+
+    /// <summary>
     /// Get the system prompt based on effort level and context size
     /// </summary>
     private static string GetSystemPrompt(string effortLevel, string contextSize)

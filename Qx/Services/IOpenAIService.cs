@@ -22,6 +22,16 @@ internal interface IOpenAIService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An async enumerable of response chunks</returns>
     IAsyncEnumerable<string> QueryStreamAsync(string query, QueryOptions options, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get a completion from OpenAI with specific parameters
+    /// </summary>
+    /// <param name="prompt">The prompt to send</param>
+    /// <param name="model">The model to use</param>
+    /// <param name="temperature">Temperature for response generation</param>
+    /// <param name="maxTokens">Maximum tokens for the response</param>
+    /// <returns>The response from OpenAI</returns>
+    Task<string> GetCompletionAsync(string prompt, string model, double temperature, int maxTokens);
 }
 
 /// <summary>
