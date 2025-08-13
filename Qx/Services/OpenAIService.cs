@@ -1,4 +1,6 @@
 using System.Runtime.CompilerServices;
+using System.Globalization;
+using System.Text;
 using OpenAI;
 using OpenAI.Chat;
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only
@@ -111,20 +113,20 @@ internal sealed class OpenAIService : IOpenAIService
             {
                 // Note: Some models may only return WebSearchCallResponseItems without message content
                 // This might be a limitation of certain models with web search
-                debugInfo.AppendLine($"[Web search: {webSearchItem.Status}]");
+                debugInfo.AppendLine(CultureInfo.InvariantCulture, $"[Web search: {webSearchItem.Status}]");
             }
             else if (item is FunctionCallResponseItem functionItem)
             {
                 // Execute the function and append the result
                 string functionResult = _toolService.ExecuteFunction(functionItem.FunctionName, functionItem.FunctionArguments);
-                resultText.AppendLine($"\n[Function Call: {functionItem.FunctionName}]");
+                resultText.AppendLine(CultureInfo.InvariantCulture, $"\n[Function Call: {functionItem.FunctionName}]");
                 resultText.AppendLine(functionResult);
                 hasTextContent = true;
             }
             else
             {
                 // Debug: log unknown item types
-                debugInfo.AppendLine($"[Debug: Unknown item type: {item?.GetType().Name}]");
+                debugInfo.AppendLine(CultureInfo.InvariantCulture, $"[Debug: Unknown item type: {item?.GetType().Name}]");
             }
         }
         
@@ -236,7 +238,7 @@ internal sealed class OpenAIService : IOpenAIService
             {
                 // Execute the function and append the result
                 string functionResult = _toolService.ExecuteFunction(functionItem.FunctionName, functionItem.FunctionArguments);
-                resultText.AppendLine($"\n[Function Call: {functionItem.FunctionName}]");
+                resultText.AppendLine(CultureInfo.InvariantCulture, $"\n[Function Call: {functionItem.FunctionName}]");
                 resultText.AppendLine(functionResult);
                 hasTextContent = true;
             }

@@ -6,6 +6,7 @@ namespace Qx.Tests.Models;
 
 public class ApiOptionsTests
 {
+    private static readonly string[] ExpectedAllowedModels = { "gpt-5", "gpt-5-nano", "gpt-5-mini", "gpt-4o", "gpt-4o-mini", "o3", "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano" };
     [Fact]
     public void Validate_WithValidOptions_ReturnsTrue()
     {
@@ -123,9 +124,10 @@ public class ApiOptionsTests
     }
 
     [Theory]
-    [InlineData("gpt-3.5-turbo", true)]
-    [InlineData("gpt-4", true)]
-    [InlineData("gpt-4-turbo", true)]
+    [InlineData("gpt-5", true)]
+    [InlineData("gpt-5-nano", true)]
+    [InlineData("gpt-4o", true)]
+    [InlineData("o3", true)]
     [InlineData("invalid-model", false)]
     [InlineData("", false)]
     public void IsModelAllowed_WithVariousModels_ReturnsExpectedResult(string model, bool expected)
@@ -242,13 +244,13 @@ public class ApiOptionsTests
         options.DefaultEffort.Should().Be(EffortLevel.Medium);
         options.DefaultContext.Should().Be(ContextSize.Medium);
         options.DefaultTimeout.Should().Be(TimeSpan.FromSeconds(60));
-        options.DefaultModel.Should().Be("gpt-5");
+        options.DefaultModel.Should().Be("gpt-5-nano");
         options.DefaultTemperature.Should().Be(1.0);
         options.DefaultMaxTokens.Should().Be(1000);
         options.EnableWebSearchByDefault.Should().BeTrue();
         options.StreamResponsesByDefault.Should().BeTrue();
         options.SystemPrompt.Should().BeNull();
-        options.AllowedModels.Should().Contain(new[] { "gpt-5", "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo" });
+        options.AllowedModels.Should().Contain(ExpectedAllowedModels);
         options.CustomHeaders.Should().BeEmpty();
         options.RateLimitPerMinute.Should().Be(60);
         options.TokenLimitPerMinute.Should().Be(90000);

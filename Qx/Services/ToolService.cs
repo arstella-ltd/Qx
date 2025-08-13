@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-#pragma warning disable OPENAI001, CA1031, CA5394, CA1307, IDE0008, CA2000
+#pragma warning disable OPENAI001, IDE0008, CA2000
 using OpenAI.Responses;
-#pragma warning restore OPENAI001, CA1031, CA5394, CA1307, IDE0008, CA2000
+#pragma warning restore OPENAI001, IDE0008, CA2000
 
 namespace Qx.Services;
 
@@ -62,7 +62,11 @@ internal sealed class ToolService
         {
             return $"Error parsing arguments: {ex.Message}";
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return $"Error executing function: {ex.Message}";
+        }
+        catch (ArgumentException ex)
         {
             return $"Error executing function: {ex.Message}";
         }
@@ -175,7 +179,11 @@ internal sealed class ToolService
 
             return $"Current time in {timezone}: {now:yyyy-MM-dd HH:mm:ss}";
         }
-        catch
+        catch (TimeZoneNotFoundException)
+        {
+            return $"Current time in UTC: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}";
+        }
+        catch (InvalidTimeZoneException)
         {
             return $"Current time in UTC: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}";
         }
@@ -197,10 +205,13 @@ internal sealed class ToolService
         }
 
         // Mock weather data (in a real implementation, this would call a weather API)
-        Random rand = new Random(location.GetHashCode());
+        // CA5394: Random is acceptable for mock weather data (not security-sensitive)
+#pragma warning disable CA5394
+        Random rand = new Random(location.GetHashCode(StringComparison.Ordinal));
         int temp = rand.Next(15, 30);
         string[] conditions = { "Sunny", "Partly Cloudy", "Cloudy", "Light Rain", "Clear" };
         string condition = conditions[rand.Next(conditions.Length)];
+#pragma warning restore CA5394
 
         if (unit == "fahrenheit")
         {
@@ -227,7 +238,15 @@ internal sealed class ToolService
             double result = EvaluateSimpleExpression(expression);
             return $"Result: {result}";
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
+        {
+            return $"Error evaluating expression: {ex.Message}";
+        }
+        catch (InvalidOperationException ex)
+        {
+            return $"Error evaluating expression: {ex.Message}";
+        }
+        catch (FormatException ex)
         {
             return $"Error evaluating expression: {ex.Message}";
         }
@@ -252,7 +271,7 @@ internal sealed class ToolService
         try
         {
             // Handle simple addition
-            if (expression.Contains('+'))
+            if (expression.Contains('+', StringComparison.Ordinal))
             {
                 string[] parts = expression.Split('+');
                 if (parts.Length == 2 && 
@@ -264,7 +283,7 @@ internal sealed class ToolService
             }
             
             // Handle simple subtraction
-            if (expression.Contains('-') && !expression.StartsWith('-'))
+            if (expression.Contains('-', StringComparison.Ordinal) && !expression.StartsWith('-'))
             {
                 string[] parts = expression.Split('-');
                 if (parts.Length == 2 && 
@@ -276,7 +295,7 @@ internal sealed class ToolService
             }
             
             // Handle simple multiplication
-            if (expression.Contains('*'))
+            if (expression.Contains('*', StringComparison.Ordinal))
             {
                 string[] parts = expression.Split('*');
                 if (parts.Length == 2 && 
@@ -288,7 +307,7 @@ internal sealed class ToolService
             }
             
             // Handle simple division
-            if (expression.Contains('/'))
+            if (expression.Contains('/', StringComparison.Ordinal))
             {
                 string[] parts = expression.Split('/');
                 if (parts.Length == 2 && 
