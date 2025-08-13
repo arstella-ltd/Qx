@@ -24,12 +24,10 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     
     <!-- 企業情報 -->
-    <Company>Qx Development Team</Company>
+    <Company>Arstella Ltd.</Company>
     <Product>Qx - Query eXpress</Product>
-    <Copyright>Copyright © 2025 Qx Development Team</Copyright>
+    <Copyright>Copyright (c) 2025 Arstella Ltd.</Copyright>
     <Version>0.1.0</Version>
-    <FileVersion>0.1.0.0</FileVersion>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
   </PropertyGroup>
   
   <!-- コード分析ルール -->
