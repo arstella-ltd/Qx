@@ -243,7 +243,7 @@ public class ApiOptionsTests
         options.DefaultContext.Should().Be(ContextSize.Medium);
         options.DefaultTimeout.Should().Be(TimeSpan.FromSeconds(60));
         options.DefaultModel.Should().Be("gpt-5");
-        options.DefaultTemperature.Should().Be(0.7);
+        options.DefaultTemperature.Should().Be(1.0);
         options.DefaultMaxTokens.Should().Be(1000);
         options.EnableWebSearchByDefault.Should().BeTrue();
         options.StreamResponsesByDefault.Should().BeTrue();

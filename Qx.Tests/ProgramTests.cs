@@ -34,13 +34,13 @@ public sealed class ProgramTests : TestBase
     public void MainWithVersionCommandShouldReturnZero()
     {
         // Arrange
-        string[] args = new[] { "version" };
+        string[] args = new[] { "--version" };
 
         // Act
         int result = Program.Main(args);
 
         // Assert
-        result.Should().Be(0); // Version command should return 0
+        result.Should().Be(0); // Version option should return 0
     }
 
     [Fact]
