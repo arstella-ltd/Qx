@@ -12,7 +12,7 @@ public sealed class OpenAIServiceTests : TestBase
         var action = () => new OpenAIService(null!);
         action.Should().Throw<ArgumentException>();
     }
-    
+
     [Fact]
     public void ConstructorWithEmptyApiKeyShouldThrow()
     {
@@ -20,7 +20,7 @@ public sealed class OpenAIServiceTests : TestBase
         var action = () => new OpenAIService(string.Empty);
         action.Should().Throw<ArgumentException>();
     }
-    
+
     [Fact]
     public void ConstructorWithWhitespaceApiKeyShouldThrow()
     {
@@ -28,13 +28,13 @@ public sealed class OpenAIServiceTests : TestBase
         var action = () => new OpenAIService("   ");
         action.Should().Throw<ArgumentException>();
     }
-    
+
     [Fact]
     public void ConstructorWithValidApiKeyShouldSucceed()
     {
         // Arrange & Act
         var service = new OpenAIService("test-api-key");
-        
+
         // Assert
         service.Should().NotBeNull();
         service.Should().BeAssignableTo<IOpenAIService>();

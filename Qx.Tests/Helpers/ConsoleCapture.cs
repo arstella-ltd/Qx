@@ -19,7 +19,7 @@ internal sealed class ConsoleCapture : IDisposable
         _originalError = Console.Error;
         _capturedOut = new StringWriter();
         _capturedError = new StringWriter();
-        
+
         Console.SetOut(_capturedOut);
         Console.SetError(_capturedError);
     }
@@ -49,7 +49,7 @@ internal sealed class ConsoleCapture : IDisposable
     public static (string output, string error) Capture(Action action)
     {
         ArgumentNullException.ThrowIfNull(action);
-        
+
         using var capture = new ConsoleCapture();
         action();
         return (capture.GetOutput(), capture.GetError());
@@ -61,7 +61,7 @@ internal sealed class ConsoleCapture : IDisposable
     public static async Task<(string output, string error)> CaptureAsync(Func<Task> action)
     {
         ArgumentNullException.ThrowIfNull(action);
-        
+
         using var capture = new ConsoleCapture();
         await action().ConfigureAwait(false);
         return (capture.GetOutput(), capture.GetError());

@@ -25,7 +25,7 @@ internal sealed class ToolService
 #pragma warning disable OPENAI001
         _availableTools = new List<ResponseTool>();
 #pragma warning restore OPENAI001
-        
+
         // Register built-in functions
         RegisterBuiltInFunctions();
     }
@@ -140,7 +140,7 @@ internal sealed class ToolService
     private void RegisterFunction(string name, string description, string parametersJson, Func<JsonDocument, string> handler)
     {
         _functionHandlers[name] = handler;
-        
+
 #pragma warning disable OPENAI001
         ResponseTool tool = ResponseTool.CreateFunctionTool(
             functionName: name,
@@ -149,7 +149,7 @@ internal sealed class ToolService
             functionSchemaIsStrict: false
         );
 #pragma warning restore OPENAI001
-        
+
         _availableTools.Add(tool);
     }
 
@@ -157,7 +157,7 @@ internal sealed class ToolService
     private static string GetCurrentTime(JsonDocument args)
     {
         string timezone = "UTC";
-        
+
         if (args.RootElement.TryGetProperty("timezone", out JsonElement tzElement))
         {
             timezone = tzElement.GetString() ?? "UTC";
@@ -167,11 +167,11 @@ internal sealed class ToolService
         {
             DateTime now = timezone.ToUpperInvariant() switch
             {
-                "PST" or "PT" => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, 
+                "PST" or "PT" => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
                     TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles")),
-                "EST" or "ET" => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, 
+                "EST" or "ET" => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
                     TimeZoneInfo.FindSystemTimeZoneById("America/New_York")),
-                "JST" => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, 
+                "JST" => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
                     TimeZoneInfo.FindSystemTimeZoneById("Asia/Tokyo")),
                 "GMT" or "UTC" => DateTime.UtcNow,
                 _ => DateTime.UtcNow
@@ -198,7 +198,7 @@ internal sealed class ToolService
 
         string location = locationElement.GetString() ?? "Unknown";
         string unit = "celsius";
-        
+
         if (args.RootElement.TryGetProperty("unit", out JsonElement unitElement))
         {
             unit = unitElement.GetString() ?? "celsius";
@@ -230,7 +230,7 @@ internal sealed class ToolService
         }
 
         string expression = exprElement.GetString() ?? "";
-        
+
         try
         {
             // Simple expression evaluator (for basic operations)
@@ -256,10 +256,10 @@ internal sealed class ToolService
     {
         // This is a very basic implementation for demonstration
         // Only handles simple arithmetic expressions for AOT compatibility
-        
+
         // Remove spaces
         expression = expression.Replace(" ", "", StringComparison.Ordinal);
-        
+
         // For this demo, we'll just handle simple cases
         if (double.TryParse(expression, NumberStyles.Any, CultureInfo.InvariantCulture, out double value))
         {
@@ -274,43 +274,43 @@ internal sealed class ToolService
             if (expression.Contains('+', StringComparison.Ordinal))
             {
                 string[] parts = expression.Split('+');
-                if (parts.Length == 2 && 
+                if (parts.Length == 2 &&
                     double.TryParse(parts[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double left) &&
                     double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double right))
                 {
                     return left + right;
                 }
             }
-            
+
             // Handle simple subtraction
             if (expression.Contains('-', StringComparison.Ordinal) && !expression.StartsWith('-'))
             {
                 string[] parts = expression.Split('-');
-                if (parts.Length == 2 && 
+                if (parts.Length == 2 &&
                     double.TryParse(parts[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double left) &&
                     double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double right))
                 {
                     return left - right;
                 }
             }
-            
+
             // Handle simple multiplication
             if (expression.Contains('*', StringComparison.Ordinal))
             {
                 string[] parts = expression.Split('*');
-                if (parts.Length == 2 && 
+                if (parts.Length == 2 &&
                     double.TryParse(parts[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double left) &&
                     double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double right))
                 {
                     return left * right;
                 }
             }
-            
+
             // Handle simple division
             if (expression.Contains('/', StringComparison.Ordinal))
             {
                 string[] parts = expression.Split('/');
-                if (parts.Length == 2 && 
+                if (parts.Length == 2 &&
                     double.TryParse(parts[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double left) &&
                     double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double right))
                 {
@@ -327,7 +327,7 @@ internal sealed class ToolService
             // If parsing fails, throw an exception
             throw new ArgumentException($"Unable to evaluate expression: {expression}");
         }
-        
+
         throw new ArgumentException($"Unable to evaluate expression: {expression}");
     }
 }

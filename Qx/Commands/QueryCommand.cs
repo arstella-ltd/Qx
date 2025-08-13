@@ -44,7 +44,7 @@ internal sealed class QueryCommand : Command
         Options.Add(maxTokensOption);
 
         var handler = new QueryCommandHandler(openAIService);
-        
+
         this.SetAction((parseResult) =>
         {
             string[] prompt = parseResult.GetValue(promptArgument) ?? Array.Empty<string>();
@@ -60,7 +60,7 @@ internal sealed class QueryCommand : Command
             {
                 maxTokens = 1000;
             }
-            
+
             Task.Run(async () => await handler.HandleAsync(prompt, model, output, temperature, maxTokens).ConfigureAwait(false)).GetAwaiter().GetResult();
             return 0;
         });

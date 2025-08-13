@@ -14,15 +14,15 @@ internal static class MockFactory
     public static IDisposable CreateMockEnvironment(Dictionary<string, string?> variables)
     {
         ArgumentNullException.ThrowIfNull(variables);
-        
+
         var originalValues = new Dictionary<string, string?>();
-        
+
         foreach (var kvp in variables)
         {
             originalValues[kvp.Key] = Environment.GetEnvironmentVariable(kvp.Key);
             Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
         }
-        
+
         return new EnvironmentRestorer(originalValues);
     }
 
@@ -35,12 +35,12 @@ internal static class MockFactory
         {
             return Array.Empty<string>();
         }
-            
+
         // Simple argument parser - doesn't handle all edge cases
         var args = new List<string>();
         var current = new System.Text.StringBuilder();
         bool inQuotes = false;
-        
+
         foreach (char c in commandLine)
         {
             if (c == '"')
@@ -60,12 +60,12 @@ internal static class MockFactory
                 current.Append(c);
             }
         }
-        
+
         if (current.Length > 0)
         {
             args.Add(current.ToString());
         }
-        
+
         return args.ToArray();
     }
 

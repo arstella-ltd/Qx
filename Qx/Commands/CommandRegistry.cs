@@ -10,73 +10,73 @@ internal static class CommandRegistry
     public static RootCommand CreateRootCommand(IServiceProvider serviceProvider)
     {
         var rootCommand = new RootCommand("Qx - Query eXpress: OpenAI-powered intelligent CLI tool for developers");
-        
+
         var openAIService = serviceProvider.GetRequiredService<IOpenAIService>();
-        
+
         // Main prompt argument for direct usage: qx "prompt"
         var promptArgument = new Argument<string>("prompt")
         {
             Description = "The natural language prompt to send",
             Arity = ArgumentArity.ZeroOrOne
         };
-        
+
         // Options
         var modelOption = new Option<string>("--model")
         {
             Description = "The AI model to use"
         };
         modelOption.Aliases.Add("-m");
-        
+
         var outputOption = new Option<string>("--output")
         {
             Description = "Output file path"
         };
         outputOption.Aliases.Add("-o");
-        
+
         var temperatureOption = new Option<double>("--temperature")
         {
             Description = "Temperature for response generation (0.0 to 2.0)"
         };
         temperatureOption.Aliases.Add("-t");
-        
+
         var maxTokensOption = new Option<int?>("--max-tokens")
         {
             Description = "Maximum number of tokens in the response (unlimited if not specified)"
         };
-        
+
         var webSearchOption = new Option<bool>("--web-search")
         {
             Description = "Enable web search for more comprehensive answers"
         };
         webSearchOption.Aliases.Add("-w");
-        
+
         var noWebSearchOption = new Option<bool>("--no-web-search")
         {
             Description = "Disable web search (use model knowledge only)"
         };
-        
+
         var functionsOption = new Option<bool>("--functions")
         {
             Description = "Enable function calling (GetCurrentTime, GetWeather, CalculateExpression)"
         };
         functionsOption.Aliases.Add("-f");
-        
+
         var noFunctionsOption = new Option<bool>("--no-functions")
         {
             Description = "Disable function calling"
         };
-        
+
         var verboseOption = new Option<bool>("--verbose")
         {
             Description = "Show detailed response information in JSON format"
         };
         verboseOption.Aliases.Add("-v");
-        
+
         var versionOption = new Option<bool>("--version")
         {
             Description = "Show version information"
         };
-        
+
         // Add argument and options to root command
         rootCommand.Arguments.Add(promptArgument);
         rootCommand.Options.Add(modelOption);
@@ -89,7 +89,7 @@ internal static class CommandRegistry
         rootCommand.Options.Add(noFunctionsOption);
         rootCommand.Options.Add(verboseOption);
         rootCommand.Options.Add(versionOption);
-        
+
         // Set handler for the root command
         rootCommand.SetAction((parseResult) =>
         {
@@ -100,9 +100,9 @@ internal static class CommandRegistry
                 Console.WriteLine("Copyright © 2025 Qx Development Team");
                 return 0;
             }
-            
+
             string? prompt = parseResult.GetValue(promptArgument);
-            
+
             // Check for stdin input if no prompt provided
             if (string.IsNullOrEmpty(prompt))
             {
@@ -127,7 +127,7 @@ internal static class CommandRegistry
                     prompt = stdinInput + " " + prompt;
                 }
             }
-            
+
             // If still no prompt, show help
             if (string.IsNullOrEmpty(prompt))
             {
@@ -151,7 +151,7 @@ internal static class CommandRegistry
                 Console.WriteLine("  -h, --help                   Show help and usage information");
                 return 0;
             }
-            
+
             // Execute the query
             string model = parseResult.GetValue(modelOption) ?? "gpt-5-nano";
             string? output = parseResult.GetValue(outputOption);
@@ -161,38 +161,38 @@ internal static class CommandRegistry
                 temperature = 1.0;
             }
             int? maxTokens = parseResult.GetValue(maxTokensOption);
-            
+
             // Determine web search setting
             bool enableWebSearch = !parseResult.GetValue(noWebSearchOption);
             if (parseResult.GetValue(webSearchOption))
             {
                 enableWebSearch = true;
             }
-            
+
             // Determine function calling setting
             bool enableFunctionCalling = !parseResult.GetValue(noFunctionsOption);
             if (parseResult.GetValue(functionsOption))
             {
                 enableFunctionCalling = true;
             }
-            
+
             bool verbose = parseResult.GetValue(verboseOption);
-            
+
             var handler = new QueryCommandHandler(openAIService);
             Task.Run(async () => await handler.HandleAsync(
-                new[] { prompt }, 
-                model, 
-                output, 
-                temperature, 
+                new[] { prompt },
+                model,
+                output,
+                temperature,
                 maxTokens,
                 enableWebSearch,
                 enableFunctionCalling,
                 verbose).ConfigureAwait(false)
             ).GetAwaiter().GetResult();
-            
+
             return 0;
         });
-        
+
         return rootCommand;
     }
 }

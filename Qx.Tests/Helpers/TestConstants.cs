@@ -85,7 +85,7 @@ public class Example
 ```
 
 This demonstrates a simple C# class.";
-        
+
         public const string Error = "An error occurred while processing your request.";
     }
 }

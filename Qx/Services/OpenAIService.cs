@@ -28,7 +28,7 @@ internal sealed class OpenAIService : IOpenAIService
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
         _apiKey = apiKey;
         _toolService = new ToolService();
-        
+
         // Create OpenAI client with the API key
         var openAIClient = new OpenAIClient(apiKey);
         _chatClient = openAIClient.GetChatClient("gpt-4o-mini");
@@ -60,7 +60,7 @@ internal sealed class OpenAIService : IOpenAIService
         {
             options.Tools.Add(ResponseTool.CreateWebSearchTool());
         }
-        
+
         // Add function calling tools
         if (enableFunctionCalling)
         {
@@ -76,17 +76,17 @@ internal sealed class OpenAIService : IOpenAIService
 
         // Process response items and extract text
         var resultText = new System.Text.StringBuilder();
-        
+
         // Debug: Log the number of output items
         if (response.Value.OutputItems == null || response.Value.OutputItems.Count == 0)
         {
             // If no output items, try to get content directly
             return "No response generated. Web search may not be available for this model.";
         }
-        
+
         bool hasTextContent = false;
         var debugInfo = new System.Text.StringBuilder();
-        
+
         foreach (ResponseItem item in response.Value.OutputItems ?? new List<ResponseItem>())
         {
             if (item is MessageResponseItem messageItem)
@@ -132,7 +132,7 @@ internal sealed class OpenAIService : IOpenAIService
                 debugInfo.AppendLine(CultureInfo.InvariantCulture, $"[Debug: Unknown item type: {item?.GetType().Name}]");
             }
         }
-        
+
         // If we got no text content, return what we have or an error message
         if (!hasTextContent)
         {
@@ -144,8 +144,8 @@ internal sealed class OpenAIService : IOpenAIService
         }
 
         string result = resultText.ToString();
-        return string.IsNullOrWhiteSpace(result) 
-            ? "No response content available. Try using a different model or disabling web search." 
+        return string.IsNullOrWhiteSpace(result)
+            ? "No response content available. Try using a different model or disabling web search."
             : result;
     }
 #pragma warning restore OPENAI001
@@ -176,7 +176,7 @@ internal sealed class OpenAIService : IOpenAIService
         {
             options.Tools.Add(ResponseTool.CreateWebSearchTool());
         }
-        
+
         // Add function calling tools
         if (enableFunctionCalling)
         {
@@ -220,7 +220,7 @@ internal sealed class OpenAIService : IOpenAIService
         // Process response items and extract text
         var resultText = new System.Text.StringBuilder();
         bool hasTextContent = false;
-        
+
         foreach (ResponseItem item in response.Value.OutputItems ?? new List<ResponseItem>())
         {
             if (item is MessageResponseItem messageItem)
@@ -249,7 +249,7 @@ internal sealed class OpenAIService : IOpenAIService
                 hasTextContent = true;
             }
         }
-        
+
         string result = hasTextContent ? resultText.ToString() : "No response content available.";
         return (result, details);
     }

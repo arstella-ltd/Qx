@@ -17,7 +17,7 @@ internal interface IOpenAIService
     /// <param name="showFunctionCalls">Whether to show function call indicators in output</param>
     /// <returns>The response from OpenAI</returns>
     Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false);
-    
+
     /// <summary>
     /// Get a completion from OpenAI with detailed response information
     /// </summary>

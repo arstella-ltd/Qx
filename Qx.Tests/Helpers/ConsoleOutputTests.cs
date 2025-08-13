@@ -76,16 +76,16 @@ public sealed class ConsoleOutputTests
     {
         // Arrange
         using var capture = new ConsoleCapture();
-        
+
         // Act
         Console.WriteLine("First output");
         capture.GetOutput().Should().Contain("First output");
-        
+
         capture.Clear();
         capture.GetOutput().Should().BeEmpty();
-        
+
         Console.WriteLine("Second output");
-        
+
         // Assert
         capture.GetOutput().Should().Contain("Second output");
         capture.GetOutput().Should().NotContain("First output");

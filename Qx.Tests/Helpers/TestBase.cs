@@ -16,7 +16,7 @@ public abstract class TestBase : IDisposable
     protected TestBase()
     {
         ServiceCollection = new ServiceCollection();
-        
+
         // Initialize services directly without calling virtual method
         var services = new ServiceCollection();
         ServiceCollection = services;

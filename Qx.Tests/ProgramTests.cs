@@ -123,8 +123,8 @@ public sealed class ProgramTests : TestBase
     public void MainWithMultipleOptionsShouldAcceptAllValues()
     {
         // Arrange
-        string[] args = new[] 
-        { 
+        string[] args = new[]
+        {
             "test query with multiple words",
             "--effort", "high",
             "--context", "low",

@@ -1,6 +1,6 @@
+using System.ClientModel;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.ClientModel;
 using System.Text.Json;
 using Qx.Services;
 
@@ -46,14 +46,14 @@ internal sealed class QueryCommandHandler
 
             // Get response with optional verbose details
             var (response, responseDetails) = await _openAIService.GetCompletionWithDetailsAsync(
-                prompt, 
-                model, 
-                temperature, 
+                prompt,
+                model,
+                temperature,
                 maxTokens,
                 enableWebSearch,
                 enableFunctionCalling,
                 verbose).ConfigureAwait(false);
-            
+
             // Show verbose output if requested
             if (verbose && responseDetails != null)
             {
