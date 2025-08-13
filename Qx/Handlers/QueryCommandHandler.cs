@@ -15,7 +15,7 @@ internal sealed class QueryCommandHandler
         _openAIService = openAIService ?? throw new ArgumentNullException(nameof(openAIService));
     }
 
-    public async Task<int> HandleAsync(string[] promptParts, string model, string? outputPath, double temperature, int maxTokens, bool enableWebSearch = true, bool verbose = false)
+    public async Task<int> HandleAsync(string[] promptParts, string model, string? outputPath, double temperature, int? maxTokens, bool enableWebSearch = true, bool verbose = false)
     {
         string prompt = string.Join(" ", promptParts ?? Array.Empty<string>());
 
@@ -28,7 +28,8 @@ internal sealed class QueryCommandHandler
         try
         {
             await Console.Out.WriteLineAsync($"Processing query with model: {model}").ConfigureAwait(false);
-            await Console.Out.WriteLineAsync($"Temperature: {temperature}, Max tokens: {maxTokens}").ConfigureAwait(false);
+            string maxTokensDisplay = maxTokens.HasValue ? maxTokens.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "unlimited";
+            await Console.Out.WriteLineAsync($"Temperature: {temperature}, Max tokens: {maxTokensDisplay}").ConfigureAwait(false);
             if (enableWebSearch)
             {
                 await Console.Out.WriteLineAsync("Web search: Enabled (Note: Not all models support web search)").ConfigureAwait(false);

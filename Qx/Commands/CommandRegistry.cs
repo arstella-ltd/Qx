@@ -39,9 +39,9 @@ internal static class CommandRegistry
         };
         temperatureOption.Aliases.Add("-t");
         
-        var maxTokensOption = new Option<int>("--max-tokens")
+        var maxTokensOption = new Option<int?>("--max-tokens")
         {
-            Description = "Maximum number of tokens in the response"
+            Description = "Maximum number of tokens in the response (unlimited if not specified)"
         };
         
         var webSearchOption = new Option<bool>("--web-search")
@@ -101,7 +101,7 @@ internal static class CommandRegistry
                 Console.WriteLine("  -m, --model <model>          The AI model to use [default: gpt-5]");
                 Console.WriteLine("  -o, --output <output>        Output file path");
                 Console.WriteLine("  -t, --temperature <temperature>  Temperature for response generation (0.0 to 2.0) [default: 1]");
-                Console.WriteLine("  --max-tokens <max-tokens>    Maximum number of tokens in the response [default: 1000]");
+                Console.WriteLine("  --max-tokens <max-tokens>    Maximum number of tokens in the response (unlimited if not specified)");
                 Console.WriteLine("  -w, --web-search             Enable web search for more comprehensive answers [default: enabled]");
                 Console.WriteLine("  --no-web-search              Disable web search (use model knowledge only)");
                 Console.WriteLine("  -v, --verbose                Show detailed response information in JSON format");
@@ -118,11 +118,7 @@ internal static class CommandRegistry
             {
                 temperature = 1.0;
             }
-            int maxTokens = parseResult.GetValue(maxTokensOption);
-            if (maxTokens == 0)
-            {
-                maxTokens = 1000;
-            }
+            int? maxTokens = parseResult.GetValue(maxTokensOption);
             
             // Determine web search setting
             bool enableWebSearch = !parseResult.GetValue(noWebSearchOption);

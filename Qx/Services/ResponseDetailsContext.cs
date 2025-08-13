@@ -15,7 +15,7 @@ internal sealed class ResponseDetails
 internal sealed class RequestOptions
 {
     public double Temperature { get; set; }
-    public int MaxTokens { get; set; }
+    public int? MaxTokens { get; set; }
     public bool WebSearchEnabled { get; set; }
 }
 
