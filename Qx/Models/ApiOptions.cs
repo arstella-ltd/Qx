@@ -31,7 +31,7 @@ internal sealed class ApiOptions
     /// Gets or sets the default temperature for generation.
     /// </summary>
     [Range(0.0, 2.0, ErrorMessage = "DefaultTemperature must be between 0.0 and 2.0")]
-    public double DefaultTemperature { get; set; } = 0.7;
+    public double DefaultTemperature { get; set; } = 1.0;
 
     /// <summary>
     /// Gets or sets the default maximum tokens.

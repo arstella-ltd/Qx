@@ -53,7 +53,7 @@ internal sealed class QueryCommand : Command
             double temperature = parseResult.GetValue(temperatureOption);
             if (temperature == 0)
             {
-                temperature = 0.7;
+                temperature = 1.0;
             }
             int maxTokens = parseResult.GetValue(maxTokensOption);
             if (maxTokens == 0)
