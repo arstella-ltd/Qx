@@ -38,7 +38,7 @@ internal sealed class OpenAIService : IOpenAIService
     /// Get a completion from OpenAI with specific parameters
     /// </summary>
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only
-    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false, string? searchContextSize = null)
+    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false, string? searchContextSize = null, string? reasoningEffort = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
         ArgumentException.ThrowIfNullOrWhiteSpace(model);
@@ -54,6 +54,21 @@ internal sealed class OpenAIService : IOpenAIService
             Temperature = (float)temperature,
             MaxOutputTokenCount = maxTokens
         };
+
+        // Add reasoning options if specified
+        if (!string.IsNullOrEmpty(reasoningEffort))
+        {
+            options.ReasoningOptions = new ResponseReasoningOptions
+            {
+                ReasoningEffortLevel = reasoningEffort.ToUpperInvariant() switch
+                {
+                    "LOW" => ResponseReasoningEffortLevel.Low,
+                    "MEDIUM" => ResponseReasoningEffortLevel.Medium,
+                    "HIGH" => ResponseReasoningEffortLevel.High,
+                    _ => ResponseReasoningEffortLevel.Medium
+                }
+            };
+        }
 
         // Add web search tool
         if (enableWebSearch)
@@ -162,7 +177,7 @@ internal sealed class OpenAIService : IOpenAIService
     /// Get a completion from OpenAI with detailed response information
     /// </summary>
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only
-    public async Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false, string? searchContextSize = null)
+    public async Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false, string? searchContextSize = null, string? reasoningEffort = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
         ArgumentException.ThrowIfNullOrWhiteSpace(model);
@@ -178,6 +193,21 @@ internal sealed class OpenAIService : IOpenAIService
             Temperature = (float)temperature,
             MaxOutputTokenCount = maxTokens
         };
+
+        // Add reasoning options if specified
+        if (!string.IsNullOrEmpty(reasoningEffort))
+        {
+            options.ReasoningOptions = new ResponseReasoningOptions
+            {
+                ReasoningEffortLevel = reasoningEffort.ToUpperInvariant() switch
+                {
+                    "LOW" => ResponseReasoningEffortLevel.Low,
+                    "MEDIUM" => ResponseReasoningEffortLevel.Medium,
+                    "HIGH" => ResponseReasoningEffortLevel.High,
+                    _ => ResponseReasoningEffortLevel.Medium
+                }
+            };
+        }
 
         // Add web search tool
         if (enableWebSearch)
