@@ -1,9 +1,9 @@
 # Qx CLI仕様書
 
 ---
-version: 2.0.0
+version: 2.1.0
 last_updated: 2025-08-13
-author: Development Team
+author: Arstella Ltd.
 status: approved
 ---
 
@@ -65,6 +65,7 @@ echo "context" | qx "additional prompt" [options]
 | `--no-functions` | - | bool | false | 関数呼び出しを無効化 | - |
 | `--verbose` | `-v` | bool | false | 詳細出力モード | QX_VERBOSE |
 | `--version` | - | bool | false | バージョン情報表示 | - |
+| `--license` | - | bool | false | ライセンス情報表示 | - |
 | `--help` | `-h` | bool | false | ヘルプ表示 | - |
 
 ### 利用可能なモデル
@@ -117,6 +118,36 @@ qx "今の東京の時間は？"
 qx "今の時間は？" --no-functions
 # 出力: 現在の時刻を取得することはできません...
 ```
+
+### ライセンス情報表示機能
+
+`--license`オプションで、Qx本体およびサードパーティ依存関係のライセンス情報を表示します。
+
+```bash
+# ライセンス情報の表示
+qx --license
+```
+
+出力例：
+```
+Qx - MIT License
+Copyright (c) 2025 Arstella Ltd.
+
+Third-party Dependencies:
+----------------------------------------
+Library                                                  Version                License      Project URL
+-----------------------------------------------------------------------------------------------------------------------------------------
+OpenAI                                                   2.3.0                  MIT License  https://github.com/openai/openai-dotnet
+System.CommandLine                                       2.0.0-beta6.25358.103  MIT License  https://github.com/dotnet/command-line-api
+Microsoft.Extensions.Configuration                       9.0.7                  MIT License  https://github.com/dotnet/runtime
+Microsoft.Extensions.Configuration.EnvironmentVariables  9.0.7                  MIT License  https://github.com/dotnet/runtime
+Microsoft.Extensions.Configuration.Json                  9.0.7                  MIT License  https://github.com/dotnet/runtime
+Microsoft.Extensions.DependencyInjection                 9.0.7                  MIT License  https://github.com/dotnet/runtime
+
+See THIRD-PARTY-NOTICES.txt for full license texts.
+```
+
+詳細なライセンステキストは`THIRD-PARTY-NOTICES.txt`ファイルに記載されています。
 
 ## 📤 入出力仕様
 
@@ -308,6 +339,9 @@ qx "What time is it?" --verbose
 
 # Web検索テスト
 qx "Latest news" --verbose
+
+# ライセンス情報確認
+qx --license
 ```
 
 ### 統合テスト
@@ -320,14 +354,16 @@ dotnet test
 
 ## 📚 関連ドキュメント
 
-- [EXAMPLE.md](./EXAMPLE.md) - 詳細な使用例集
-- [TECH.md](./TECH.md) - 技術仕様
+- [08_EXAMPLE.md](./08_EXAMPLE.md) - 詳細な使用例集
+- [03_TECH.md](./03_TECH.md) - 技術仕様
 - [README.md](../README.md) - クイックスタート
+- [THIRD-PARTY-NOTICES.txt](../THIRD-PARTY-NOTICES.txt) - サードパーティライセンス
 
 ## 🔄 変更履歴
 
 | 日付 | バージョン | 変更内容 | 変更者 |
 |------|------------|----------|--------|
+| 2025-08-13 | 2.1.0 | --licenseオプション追加、ライセンス情報表示機能実装 | Arstella Ltd. |
 | 2025-08-13 | 2.0.0 | 標準入力対応、Function Call表示制御追加 | Development Team |
 | 2025-08-12 | 1.0.0 | 初版作成 | Development Team |
 

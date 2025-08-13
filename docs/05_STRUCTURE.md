@@ -1,101 +1,87 @@
 # Qx プロジェクト構造
 
 ---
-version: 1.0.0
-last_updated: 2025-08-12
-author: Development Team
-status: draft
+version: 2.0.0
+last_updated: 2025-08-13
+author: Arstella Ltd.
+status: approved
 ---
 
 ## 📁 ディレクトリ構造
 
 ```
 Qx/
-├── src/
-│   └── Qx/
-│       ├── Command/                    # CLIコマンド実装
-│       │   ├── QueryCommand.cs
-│       │   ├── HelpCommand.cs
-│       │   └── VersionCommand.cs
-│       ├── Service/                    # ビジネスロジック
-│       │   ├── IOpenAIService.cs
-│       │   ├── OpenAIService.cs
-│       │   ├── IRetryService.cs
-│       │   └── RetryService.cs
-│       ├── Model/                      # データモデル
-│       │   ├── Query.cs
-│       │   ├── Response.cs
-│       │   ├── Configuration.cs
-│       │   └── ApiOption.cs
-│       ├── Handler/                    # 処理ハンドラー
-│       │   ├── ICommandHandler.cs
-│       │   ├── CommandHandler.cs
-│       │   └── StreamHandler.cs
-│       ├── Formatter/                  # 出力フォーマッター
-│       │   ├── IOutputFormatter.cs
-│       │   ├── ConsoleFormatter.cs
-│       │   └── ErrorFormatter.cs
-│       ├── Validator/                  # 入力検証
-│       │   ├── IInputValidator.cs
-│       │   └── InputValidator.cs
-│       ├── Extension/                  # 拡張メソッド
-│       │   ├── StringExtensions.cs
-│       │   └── TaskExtensions.cs
-│       ├── Exception/                  # カスタム例外
-│       │   ├── QxException.cs
-│       │   └── ApiException.cs
-│       ├── Program.cs                  # エントリーポイント
-│       └── Qx.csproj                   # プロジェクトファイル
+├── Qx/                                  # メインプロジェクト
+│   ├── Commands/                       # CLIコマンド実装
+│   │   ├── CommandRegistry.cs         # コマンド登録
+│   │   └── QueryCommand.cs            # クエリコマンド
+│   ├── Handlers/                       # 処理ハンドラー
+│   │   └── QueryCommandHandler.cs     # クエリコマンドハンドラー
+│   ├── Models/                         # データモデル
+│   │   ├── ApiOptions.cs              # API設定
+│   │   ├── Configuration.cs           # 設定
+│   │   ├── LicenseInfo.cs             # ライセンス情報 ✨NEW
+│   │   ├── Query.cs                   # クエリモデル
+│   │   └── Response.cs                # レスポンスモデル
+│   ├── Services/                       # ビジネスロジック
+│   │   ├── IOpenAIService.cs          # OpenAIサービスインターフェース
+│   │   ├── LicenseHelper.cs           # ライセンスヘルパー ✨NEW
+│   │   ├── OpenAIService.cs           # OpenAIサービス実装
+│   │   ├── ResponseDetailsContext.cs  # レスポンス詳細コンテキスト
+│   │   └── ToolService.cs             # ツールサービス
+│   ├── Properties/                     # アセンブリ情報
+│   │   └── AssemblyInfo.cs
+│   ├── Program.cs                      # エントリーポイント
+│   └── Qx.csproj                       # プロジェクトファイル
 │
-├── test/
-│   ├── Qx.Tests/
-│   │   ├── Command/                    # コマンドテスト
-│   │   │   └── QueryCommandTests.cs
-│   │   ├── Service/                    # サービステスト
-│   │   │   └── OpenAIServiceTests.cs
-│   │   ├── Model/                      # モデルテスト
-│   │   │   └── QueryTests.cs
-│   │   ├── Handler/                    # ハンドラーテスト
-│   │   │   └── CommandHandlerTests.cs
-│   │   ├── Validator/                  # バリデーターテスト
-│   │   │   └── InputValidatorTests.cs
-│   │   ├── Helper/                     # テストヘルパー
-│   │   │   ├── TestBase.cs
-│   │   │   └── MockFactory.cs
-│   │   └── Qx.Tests.csproj
-│   │
-│   └── Qx.IntegrationTests/
-│       ├── ApiIntegrationTests.cs      # API統合テスト
-│       ├── EndToEndTests.cs            # E2Eテスト
-│       ├── PerformanceTests.cs         # パフォーマンステスト
-│       └── Qx.IntegrationTests.csproj
+├── Qx.Tests/                            # ユニットテスト
+│   ├── Commands/                       # コマンドテスト
+│   ├── Helpers/                        # テストヘルパー
+│   │   ├── ConsoleCapture.cs
+│   │   ├── ConsoleOutputTests.cs
+│   │   ├── MockFactory.cs
+│   │   ├── TestBase.cs
+│   │   └── TestConstants.cs
+│   ├── Models/                         # モデルテスト
+│   │   ├── ApiOptionsTests.cs
+│   │   ├── ConfigurationTests.cs
+│   │   ├── QueryTests.cs
+│   │   └── ResponseTests.cs
+│   ├── Services/                       # サービステスト
+│   │   └── OpenAIServiceTests.cs
+│   ├── Properties/                     # アセンブリ情報
+│   │   └── AssemblyInfo.cs
+│   ├── ProgramTests.cs                 # プログラムテスト
+│   └── Qx.Tests.csproj                 # テストプロジェクト
 │
 ├── docs/                                # ドキュメント
-│   ├── PRODUCT.md
-│   ├── REQUIREMENTS.md
-│   ├── TECH.md
-│   ├── DESIGN.md
-│   └── STRUCTURE.md
+│   ├── 00_INDEX.md                     # ドキュメント目次
+│   ├── 01_PRODUCT.md                   # 製品概要
+│   ├── 02_REQUIREMENTS.md              # 要求定義
+│   ├── 03_TECH.md                      # 技術仕様
+│   ├── 04_DESIGN.md                    # 設計書
+│   ├── 05_STRUCTURE.md                 # 構造説明（本書）
+│   ├── 06_TASK.md                      # タスク管理
+│   ├── 07_CLI_SPEC.md                  # CLI仕様書
+│   └── 08_EXAMPLE.md                   # 使用例集
 │
 ├── .github/
 │   └── workflows/                      # GitHub Actions
 │       ├── ci.yml                      # CI パイプライン
-│       ├── release.yml                 # リリースワークフロー
-│       └── codeql.yml                  # セキュリティ分析
+│       └── release.yml                 # リリースワークフロー
 │
-├── script/                              # ビルド・デプロイスクリプト
-│   ├── build.sh                        # ビルドスクリプト
-│   ├── test.sh                         # テスト実行スクリプト
-│   └── publish.sh                      # パブリッシュスクリプト
+├── .git/
+│   └── hooks/                          # Gitフック
+│       └── pre-commit                  # フォーマットチェック ✨NEW
 │
 ├── .editorconfig                        # エディター設定
 ├── .gitignore                          # Git除外設定
 ├── Directory.Build.props               # 共通ビルド設定
 ├── Directory.Packages.props           # 集中パッケージ管理
 ├── global.json                         # .NET SDK バージョン
-├── nuget.config                        # NuGet設定
-├── LICENSE                             # ライセンスファイル
+├── LICENSE                             # ライセンスファイル ✨NEW
 ├── README.md                           # プロジェクト説明
+├── THIRD-PARTY-NOTICES.txt            # サードパーティライセンス ✨NEW
 └── Qx.sln                             # ソリューションファイル
 ```
 

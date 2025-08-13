@@ -1,9 +1,9 @@
 # Qx 技術仕様書
 
 ---
-version: 1.1.0
+version: 2.0.0
 last_updated: 2025-08-13
-author: Development Team
+author: Arstella Ltd.
 status: approved
 ---
 
@@ -369,6 +369,10 @@ lipo -create ./publish/osx-arm64/qx ./publish/osx-x64/qx -output ./publish/qx-un
 **本番依存:**
 - OpenAI: v2.3.0（公式SDK、2025年8月最新）
 - System.CommandLine: v2.0.0-beta6.25358.103（CLIフレームワーク、最新ベータ）
+- Microsoft.Extensions.Configuration: v9.0.7（設定管理）
+- Microsoft.Extensions.Configuration.EnvironmentVariables: v9.0.7（環境変数）
+- Microsoft.Extensions.Configuration.Json: v9.0.7（JSON設定）
+- Microsoft.Extensions.DependencyInjection: v9.0.7（DI）
 
 **開発・テスト依存:**
 - xUnit: v2.9.3（テストフレームワーク、最新安定版）
@@ -425,12 +429,75 @@ git push origin v1.0.0
 | 四半期 | .NET SDKバージョン確認 |
 | 年次 | メジャーバージョン計画 |
 
+## 🎫 ライセンス管理機能
+
+### 概要
+
+Qxは`--license`オプションにより、アプリケーション本体およびサードパーティ依存関係のライセンス情報を表示します。
+
+### 実装詳細
+
+#### アーキテクチャ
+
+```
+CommandRegistry.cs
+    ↓
+ILicenseHelper (interface)
+    ↓
+LicenseHelper.cs (implementation)
+    ↓
+LicenseInfo.cs (model)
+```
+
+#### 主要コンポーネント
+
+**LicenseInfo.cs:**
+- `LicenseInfo`: アプリケーション情報（名前、バージョン、ライセンス、依存関係）
+- `LicenseData`: 依存関係の詳細（バージョン、ライセンス、プロジェクトURL）
+
+**LicenseHelper.cs:**
+- ライセンス情報の取得とフォーマット
+- ハードコードされた依存関係情報の管理
+- THIRD-PARTY-NOTICES.txt生成機能
+
+**CommandRegistry.cs:**
+- `--license`オプションハンドラー
+- 同期的なライセンス情報取得と表示
+
+#### ライセンス情報の管理
+
+**表示されるライセンス:**
+- MIT License
+- Apache License 2.0  
+- BSD License
+
+**サードパーティライセンス:**
+全ての依存関係のライセンス全文は`THIRD-PARTY-NOTICES.txt`に記載。
+
+### 表示フォーマット
+
+```
+Qx - MIT License
+Copyright (c) 2025 Arstella Ltd.
+
+Third-party Dependencies:
+----------------------------------------
+Library                    Version    License         Project URL
+-----------------------------------------------------------------------
+OpenAI                     2.3.0      MIT License     https://github.com/openai/openai-dotnet
+System.CommandLine         2.0.0-b... MIT License     https://github.com/dotnet/command-line-api
+...
+
+See THIRD-PARTY-NOTICES.txt for full license texts.
+```
+
 ## 🔄 変更履歴
 
 | 日付 | バージョン | 変更内容 | 変更者 |
 |------|------------|----------|--------|
+| 2025-08-13 | 2.0.0 | ライセンス管理機能追加、依存関係情報更新 | Arstella Ltd. |
 | 2025-08-12 | 1.0.0 | 初版作成 | Development Team |
 
 ---
 
-*このドキュメントは技術仕様に焦点を当てています。機能要求は [REQUIREMENTS.md](./REQUIREMENTS.md)、製品ビジョンは [PRODUCT.md](./PRODUCT.md) を参照してください。*
+*このドキュメントは技術仕様に焦点を当てています。機能要求は [02_REQUIREMENTS.md](./02_REQUIREMENTS.md)、製品ビジョンは [01_PRODUCT.md](./01_PRODUCT.md) を参照してください。*

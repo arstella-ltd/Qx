@@ -1,10 +1,10 @@
 # Qx 設計書
 
 ---
-version: 1.0.0
-last_updated: 2025-08-12
-author: Development Team
-status: draft
+version: 2.0.0
+last_updated: 2025-08-13
+author: Arstella Ltd.
+status: approved
 ---
 
 ## 📐 アーキテクチャ概要
@@ -227,13 +227,27 @@ IRetryManager
 └── IsRetryable(exception: Exception): bool
 ```
 
+#### 7. License Manager
+**責務:**
+- ライセンス情報の収集
+- 依存関係のライセンス管理
+- ライセンス情報のフォーマット
+
+**インターフェース:**
+```
+ILicenseHelper
+├── GetLicenseInfoAsync(): Task<Dictionary<string, LicenseData>>
+├── GetVersionInfoAsync(): Task<LicenseInfo>
+└── GenerateThirdPartyNoticesAsync(filePath: string): Task
+```
+
 ### コンポーネント間の相互作用
 
 ```
 User Input
     ↓
 CLI Interface ← Configuration Manager
-    ↓
+    ↓            ← License Manager
 Command Parser
     ↓
 Command Handler ← Input Validator
@@ -274,6 +288,19 @@ classDiagram
         +RetryPolicy RetryPolicy
     }
     
+    class LicenseInfo {
+        +string Name
+        +string Version
+        +string License
+        +Dictionary Dependencies
+    }
+    
+    class LicenseData {
+        +string Version
+        +string License
+        +string ProjectUrl
+    }
+    
     class ApiOptions {
         +EffortLevel DefaultEffort
         +ContextSize DefaultContext
@@ -297,6 +324,7 @@ classDiagram
     Configuration --> ApiOptions
     Configuration --> RetryPolicy
     Result --> Error
+    LicenseInfo --> LicenseData
 ```
 
 ### 状態遷移
@@ -471,6 +499,7 @@ Output Stream
 
 | 日付 | バージョン | 変更内容 | 変更者 |
 |------|------------|----------|--------|
+| 2025-08-13 | 2.0.0 | ライセンス管理機能追加、アーキテクチャ更新 | Arstella Ltd. |
 | 2025-08-12 | 1.0.0 | 初版作成 | Development Team |
 
 ---
