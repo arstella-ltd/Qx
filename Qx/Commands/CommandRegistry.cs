@@ -55,6 +55,12 @@ internal static class CommandRegistry
             Description = "Disable web search (use model knowledge only)"
         };
         
+        var verboseOption = new Option<bool>("--verbose")
+        {
+            Description = "Show detailed response information in JSON format"
+        };
+        verboseOption.Aliases.Add("-v");
+        
         var versionOption = new Option<bool>("--version")
         {
             Description = "Show version information"
@@ -68,6 +74,7 @@ internal static class CommandRegistry
         rootCommand.Options.Add(maxTokensOption);
         rootCommand.Options.Add(webSearchOption);
         rootCommand.Options.Add(noWebSearchOption);
+        rootCommand.Options.Add(verboseOption);
         rootCommand.Options.Add(versionOption);
         
         // Set handler for the root command
@@ -97,6 +104,7 @@ internal static class CommandRegistry
                 Console.WriteLine("  --max-tokens <max-tokens>    Maximum number of tokens in the response [default: 1000]");
                 Console.WriteLine("  -w, --web-search             Enable web search for more comprehensive answers [default: enabled]");
                 Console.WriteLine("  --no-web-search              Disable web search (use model knowledge only)");
+                Console.WriteLine("  -v, --verbose                Show detailed response information in JSON format");
                 Console.WriteLine("  --version                    Show version information");
                 Console.WriteLine("  -h, --help                   Show help and usage information");
                 return 0;
@@ -123,6 +131,8 @@ internal static class CommandRegistry
                 enableWebSearch = true;
             }
             
+            bool verbose = parseResult.GetValue(verboseOption);
+            
             var handler = new QueryCommandHandler(openAIService);
             Task.Run(async () => await handler.HandleAsync(
                 new[] { prompt }, 
@@ -130,7 +140,8 @@ internal static class CommandRegistry
                 output, 
                 temperature, 
                 maxTokens,
-                enableWebSearch).ConfigureAwait(false)
+                enableWebSearch,
+                verbose).ConfigureAwait(false)
             ).GetAwaiter().GetResult();
             
             return 0;

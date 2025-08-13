@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.ClientModel;
+using System.Text.Json;
 using Qx.Services;
 
 namespace Qx.Handlers;
@@ -14,7 +15,7 @@ internal sealed class QueryCommandHandler
         _openAIService = openAIService ?? throw new ArgumentNullException(nameof(openAIService));
     }
 
-    public async Task<int> HandleAsync(string[] promptParts, string model, string? outputPath, double temperature, int maxTokens, bool enableWebSearch = true)
+    public async Task<int> HandleAsync(string[] promptParts, string model, string? outputPath, double temperature, int maxTokens, bool enableWebSearch = true, bool verbose = false)
     {
         string prompt = string.Join(" ", promptParts ?? Array.Empty<string>());
 
@@ -34,12 +35,23 @@ internal sealed class QueryCommandHandler
             }
             await Console.Out.WriteLineAsync().ConfigureAwait(false);
 
-            string response = await _openAIService.GetCompletionAsync(
+            // Get response with optional verbose details
+            var (response, responseDetails) = await _openAIService.GetCompletionWithDetailsAsync(
                 prompt, 
                 model, 
                 temperature, 
                 maxTokens,
                 enableWebSearch).ConfigureAwait(false);
+            
+            // Show verbose output if requested
+            if (verbose && responseDetails != null)
+            {
+                await Console.Out.WriteLineAsync("\n=== Response Details (JSON) ===").ConfigureAwait(false);
+                // Use source-generated JSON serializer for AOT compatibility
+                string jsonOutput = JsonSerializer.Serialize(responseDetails, ResponseDetailsJsonContext.Default.ResponseDetails);
+                await Console.Out.WriteLineAsync(jsonOutput).ConfigureAwait(false);
+                await Console.Out.WriteLineAsync("\n=== Response Text ===").ConfigureAwait(false);
+            }
 
             if (!string.IsNullOrEmpty(outputPath))
             {

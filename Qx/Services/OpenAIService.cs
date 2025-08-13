@@ -4,6 +4,7 @@ using OpenAI.Chat;
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only
 using OpenAI.Responses;
 #pragma warning restore OPENAI001
+using System.Text.Json;
 
 namespace Qx.Services;
 
@@ -215,7 +216,7 @@ internal sealed class OpenAIService : IOpenAIService
             bool hasTextContent = false;
             var debugInfo = new System.Text.StringBuilder();
             
-            foreach (ResponseItem item in response.Value.OutputItems)
+            foreach (ResponseItem item in response.Value.OutputItems ?? new List<ResponseItem>())
             {
                 if (item is MessageResponseItem messageItem)
                 {
@@ -284,6 +285,135 @@ internal sealed class OpenAIService : IOpenAIService
 
             var completion = await chatClient.CompleteChatAsync(messages, chatOptions).ConfigureAwait(false);
             return completion.Value.Content[0].Text ?? string.Empty;
+        }
+    }
+#pragma warning restore OPENAI001
+
+    /// <summary>
+    /// Get a completion from OpenAI with detailed response information
+    /// </summary>
+#pragma warning disable OPENAI001 // Type is for evaluation purposes only
+    public async Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int maxTokens, bool enableWebSearch = false)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
+        ArgumentException.ThrowIfNullOrWhiteSpace(model);
+
+        // Use OpenAIResponseClient for web search support
+        // Note: Web search works best with specific models like gpt-4o-mini
+        // For other models, we'll fallback to regular chat if web search fails
+        if (enableWebSearch && (model.Contains("gpt-4o", StringComparison.OrdinalIgnoreCase) || model.Contains("o1", StringComparison.OrdinalIgnoreCase)))
+        {
+            var responseClient = new OpenAIResponseClient(
+                model: model,
+                apiKey: _apiKey);
+
+            var options = new ResponseCreationOptions
+            {
+                Temperature = (float)temperature,
+                MaxOutputTokenCount = maxTokens
+            };
+
+            // Add web search tool
+            options.Tools.Add(ResponseTool.CreateWebSearchTool());
+
+            var response = await responseClient.CreateResponseAsync(
+                userInputText: prompt,
+                options).ConfigureAwait(false);
+
+            // Create detailed response object
+            var details = new ResponseDetails
+            {
+                Model = model,
+                RequestOptions = new RequestOptions
+                {
+                    Temperature = temperature,
+                    MaxTokens = maxTokens,
+                    WebSearchEnabled = true
+                },
+                ResponseMetadata = new ResponseMetadata
+                {
+                    OutputItemsCount = response.Value.OutputItems?.Count ?? 0,
+                    Items = response.Value.OutputItems?.Select(item => new ItemInfo
+                    {
+                        Type = item.GetType().Name,
+                        Content = item is MessageResponseItem msg ? new ContentInfo
+                        {
+                            ContentCount = msg.Content?.Count ?? 0,
+                            TextPreviews = msg.Content?.Select(c => c.Text?.Length > 100 ? c.Text[..100] + "..." : c.Text).ToList()
+                        } : null,
+                        WebSearchStatus = item is WebSearchCallResponseItem ws ? ws.Status?.ToString() : null
+                    }).ToList()
+                }
+            };
+
+            // Process response items and extract text
+            var resultText = new System.Text.StringBuilder();
+            bool hasTextContent = false;
+            
+            foreach (ResponseItem item in response.Value.OutputItems ?? new List<ResponseItem>())
+            {
+                if (item is MessageResponseItem messageItem)
+                {
+                    if (messageItem.Content != null && messageItem.Content.Count > 0)
+                    {
+                        foreach (var contentItem in messageItem.Content)
+                        {
+                            if (contentItem?.Text != null)
+                            {
+                                resultText.Append(contentItem.Text);
+                                hasTextContent = true;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            string result = hasTextContent ? resultText.ToString() : "No response content available.";
+            return (result, details);
+        }
+        else
+        {
+            // Use regular ChatClient without web search
+            var openAIClient = new OpenAIClient(_apiKey);
+            var chatClient = openAIClient.GetChatClient(model);
+
+            var messages = new List<ChatMessage>
+            {
+                new UserChatMessage(prompt)
+            };
+
+            var chatOptions = new ChatCompletionOptions
+            {
+                Temperature = (float)temperature,
+                MaxOutputTokenCount = maxTokens
+            };
+
+            var completion = await chatClient.CompleteChatAsync(messages, chatOptions).ConfigureAwait(false);
+            
+            // Create detailed response object for regular chat
+            var details = new ResponseDetails
+            {
+                Model = model,
+                RequestOptions = new RequestOptions
+                {
+                    Temperature = temperature,
+                    MaxTokens = maxTokens,
+                    WebSearchEnabled = false
+                },
+                ResponseMetadata = new ResponseMetadata
+                {
+                    ContentCount = completion.Value.Content?.Count ?? 0,
+                    FinishReason = completion.Value.FinishReason.ToString(),
+                    Usage = completion.Value.Usage != null ? new UsageInfo
+                    {
+                        PromptTokens = completion.Value.Usage.InputTokenCount,
+                        CompletionTokens = completion.Value.Usage.OutputTokenCount,
+                        TotalTokens = completion.Value.Usage.TotalTokenCount
+                    } : null
+                }
+            };
+            
+            return (completion.Value.Content?[0].Text ?? string.Empty, details);
         }
     }
 #pragma warning restore OPENAI001
