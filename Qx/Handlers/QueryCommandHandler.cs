@@ -51,7 +51,8 @@ internal sealed class QueryCommandHandler
                 temperature, 
                 maxTokens,
                 enableWebSearch,
-                enableFunctionCalling).ConfigureAwait(false);
+                enableFunctionCalling,
+                verbose).ConfigureAwait(false);
             
             // Show verbose output if requested
             if (verbose && responseDetails != null)
