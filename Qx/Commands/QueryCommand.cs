@@ -61,7 +61,7 @@ internal sealed class QueryCommand : Command
                 maxTokens = 1000;
             }
             
-            Task.Run(async () => await handler.HandleAsync(prompt, model, output, temperature, maxTokens)).GetAwaiter().GetResult();
+            Task.Run(async () => await handler.HandleAsync(prompt, model, output, temperature, maxTokens).ConfigureAwait(false)).GetAwaiter().GetResult();
             return 0;
         });
     }

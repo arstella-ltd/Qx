@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.ClientModel;
 using Qx.Services;
 
 namespace Qx.Handlers;
@@ -19,15 +20,15 @@ internal sealed class QueryCommandHandler
 
         if (string.IsNullOrWhiteSpace(prompt))
         {
-            Console.WriteLine("Error: Prompt cannot be empty.");
+            await Console.Error.WriteLineAsync("Error: Prompt cannot be empty.").ConfigureAwait(false);
             return 1;
         }
 
         try
         {
-            Console.WriteLine($"Processing query with model: {model}");
-            Console.WriteLine($"Temperature: {temperature}, Max tokens: {maxTokens}");
-            Console.WriteLine();
+            await Console.Out.WriteLineAsync($"Processing query with model: {model}").ConfigureAwait(false);
+            await Console.Out.WriteLineAsync($"Temperature: {temperature}, Max tokens: {maxTokens}").ConfigureAwait(false);
+            await Console.Out.WriteLineAsync().ConfigureAwait(false);
 
             string response = await _openAIService.GetCompletionAsync(
                 prompt, 
@@ -38,20 +39,40 @@ internal sealed class QueryCommandHandler
             if (!string.IsNullOrEmpty(outputPath))
             {
                 await File.WriteAllTextAsync(outputPath, response).ConfigureAwait(false);
-                Console.WriteLine($"Response saved to: {outputPath}");
+                await Console.Out.WriteLineAsync($"Response saved to: {outputPath}").ConfigureAwait(false);
             }
             else
             {
-                Console.WriteLine("Response:");
-                Console.WriteLine(response);
+                await Console.Out.WriteLineAsync("Response:").ConfigureAwait(false);
+                await Console.Out.WriteLineAsync(response).ConfigureAwait(false);
             }
 
             return 0;
         }
-        catch (Exception ex)
+        catch (ClientResultException ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
-            return 1;
+            await Console.Error.WriteLineAsync($"API Error: {ex.Message}").ConfigureAwait(false);
+            return 2;
+        }
+        catch (HttpRequestException ex)
+        {
+            await Console.Error.WriteLineAsync($"Network Error: {ex.Message}").ConfigureAwait(false);
+            return 3;
+        }
+        catch (TaskCanceledException)
+        {
+            await Console.Error.WriteLineAsync("Error: Request timed out.").ConfigureAwait(false);
+            return 124;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            await Console.Error.WriteLineAsync($"File Access Error: {ex.Message}").ConfigureAwait(false);
+            return 4;
+        }
+        catch (IOException ex)
+        {
+            await Console.Error.WriteLineAsync($"I/O Error: {ex.Message}").ConfigureAwait(false);
+            return 5;
         }
     }
 }
