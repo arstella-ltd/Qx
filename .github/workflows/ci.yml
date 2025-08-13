@@ -104,14 +104,14 @@ jobs:
     - name: Test AoT binary (Unix)
       if: runner.os != 'Windows'
       run: |
-        ./publish/${{ matrix.rid }}/qx version
+        ./publish/${{ matrix.rid }}/qx --version
         ./publish/${{ matrix.rid }}/qx --help
       shell: bash
 
     - name: Test AoT binary (Windows)
       if: runner.os == 'Windows'
       run: |
-        ./publish/${{ matrix.rid }}/qx.exe version
+        ./publish/${{ matrix.rid }}/qx.exe --version
         ./publish/${{ matrix.rid }}/qx.exe --help
       shell: pwsh
 
