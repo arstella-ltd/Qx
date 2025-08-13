@@ -103,13 +103,40 @@ internal static class CommandRegistry
             
             string? prompt = parseResult.GetValue(promptArgument);
             
-            // If no prompt provided, show help
+            // Check for stdin input if no prompt provided
+            if (string.IsNullOrEmpty(prompt))
+            {
+                // Check if stdin is redirected (piped or redirected from file)
+                if (Console.IsInputRedirected)
+                {
+                    prompt = Console.In.ReadToEnd();
+                    // Trim trailing newline if present
+                    if (!string.IsNullOrEmpty(prompt))
+                    {
+                        prompt = prompt.TrimEnd('\n', '\r');
+                    }
+                }
+            }
+            else if (Console.IsInputRedirected)
+            {
+                // If both command-line argument and stdin are available,
+                // combine them (stdin first, then command-line argument)
+                string stdinInput = Console.In.ReadToEnd().TrimEnd('\n', '\r');
+                if (!string.IsNullOrEmpty(stdinInput))
+                {
+                    prompt = stdinInput + " " + prompt;
+                }
+            }
+            
+            // If still no prompt, show help
             if (string.IsNullOrEmpty(prompt))
             {
                 Console.WriteLine("Usage: qx <prompt> [options]");
+                Console.WriteLine("       echo <prompt> | qx [options]");
+                Console.WriteLine("       qx [options] < prompt.txt");
                 Console.WriteLine("\nRun a query against OpenAI API.");
                 Console.WriteLine("\nArguments:");
-                Console.WriteLine("  <prompt>  The natural language prompt to send");
+                Console.WriteLine("  <prompt>  The natural language prompt to send (can also be provided via stdin)");
                 Console.WriteLine("\nOptions:");
                 Console.WriteLine("  -m, --model <model>          The AI model to use [default: gpt-5-nano]");
                 Console.WriteLine("  -o, --output <output>        Output file path");
