@@ -1,0 +1,199 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+      release_upload_url: ${{ steps.create_release.outputs.upload_url }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Extract version from tag
+      id: extract_version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+        echo "# Qx v${{ steps.extract_version.outputs.version }}" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "## 🚀 Features" >> $GITHUB_OUTPUT
+        echo "- CLI-based OpenAI assistant with context-aware interactions" >> $GITHUB_OUTPUT
+        echo "- Native AOT compiled for instant startup" >> $GITHUB_OUTPUT
+        echo "- Cross-platform support (Windows, macOS, Linux)" >> $GITHUB_OUTPUT
+        echo "- Pipeline support for Unix-like command chaining" >> $GITHUB_OUTPUT
+        echo "- Built-in templates for common tasks" >> $GITHUB_OUTPUT
+        echo "- Verbose mode for detailed API interactions" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "## 📥 Installation" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "Download the appropriate binary for your platform from the assets below." >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "## 🛠️ Usage" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "\`\`\`bash" >> $GITHUB_OUTPUT
+        echo "# Basic usage" >> $GITHUB_OUTPUT
+        echo "qx \"What is the weather today?\"" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "# Pipeline support" >> $GITHUB_OUTPUT
+        echo "cat file.txt | qx \"Summarize this\"" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "# Use templates" >> $GITHUB_OUTPUT
+        echo "qx translate \"Hello, world!\"" >> $GITHUB_OUTPUT
+        echo "qx code-review main.py" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "# Verbose mode" >> $GITHUB_OUTPUT
+        echo "qx -v \"Explain quantum computing\"" >> $GITHUB_OUTPUT
+        echo "\`\`\`" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: ${{ github.ref_name }}
+        body: ${{ steps.release_notes.outputs.release_notes }}
+        draft: false
+        prerelease: ${{ contains(steps.extract_version.outputs.version, '-') }}
+        generate_release_notes: false
+
+  build-and-release:
+    name: Build and Release - ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    needs: create-release
+    permissions:
+      contents: write
+    env:
+      ASSET_NAME_PREFIX: qx
+    strategy:
+      matrix:
+        config:
+          - name: "Windows x64"
+            os: windows-latest
+            rid: win-x64
+            output: qx.exe
+          - name: "macOS x64"
+            os: macos-latest
+            rid: osx-x64
+            output: qx
+          - name: "macOS ARM64"
+            os: macos-latest
+            rid: osx-arm64
+            output: qx
+          - name: "Linux x64"
+            os: ubuntu-latest
+            rid: linux-x64
+            output: qx
+          - name: "Linux ARM64"
+            os: ubuntu-24.04-arm
+            rid: linux-arm64
+            output: qx
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Run tests
+      run: dotnet test --configuration Release
+
+    - name: Extract version from tag (Windows)
+      if: runner.os == 'Windows'
+      id: extract_version_windows
+      shell: pwsh
+      run: |
+        $VERSION = "${{ github.ref_name }}".TrimStart('v')
+        echo "version=$VERSION" >> $env:GITHUB_OUTPUT
+
+    - name: Extract version from tag (Unix)
+      if: runner.os != 'Windows'
+      id: extract_version_unix
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Publish Native AOT
+      run: |
+        dotnet publish Qx/Qx.csproj -c Release -r ${{ matrix.config.rid }} -p:PublishAot=true -p:StripSymbols=true -p:Version=${{ steps.extract_version_windows.outputs.version || steps.extract_version_unix.outputs.version }} -p:IncludeSourceRevisionInInformationalVersion=false --self-contained -o publish/${{ matrix.config.rid }}
+
+    - name: Compress binary to zip (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        cd publish/${{ matrix.config.rid }}
+        Compress-Archive -Path ${{ matrix.config.output }} -DestinationPath ../../${{ env.ASSET_NAME_PREFIX }}-${{ steps.extract_version_windows.outputs.version || steps.extract_version_unix.outputs.version }}-${{ matrix.config.rid }}.zip
+        cd ../..
+
+    - name: Compress binary to zip (Unix)
+      if: runner.os != 'Windows'
+      run: |
+        cd publish/${{ matrix.config.rid }}
+        zip -j ../../${{ env.ASSET_NAME_PREFIX }}-${{ steps.extract_version_windows.outputs.version || steps.extract_version_unix.outputs.version }}-${{ matrix.config.rid }}.zip ${{ matrix.config.output }}
+        cd ../..
+
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          ${{ env.ASSET_NAME_PREFIX }}-${{ steps.extract_version_windows.outputs.version || steps.extract_version_unix.outputs.version }}-${{ matrix.config.rid }}.zip
+
+  generate-checksums:
+    name: Generate Checksums
+    runs-on: ubuntu-latest
+    needs: [create-release, build-and-release]
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Extract version from tag
+      id: extract_version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+    
+    - name: Download release assets
+      uses: robinraju/release-downloader@v1.11
+      with:
+        tag: ${{ github.ref_name }}
+        fileName: "*.zip"
+        out-file-path: "downloads"
+    
+    - name: Generate checksums
+      run: |
+        cd downloads
+        sha256sum *.zip > ../qx-${{ steps.extract_version.outputs.version }}-checksums.txt
+        cd ..
+        cat qx-${{ steps.extract_version.outputs.version }}-checksums.txt
+    
+    - name: Upload checksums
+      uses: softprops/action-gh-release@v2
+      with:
+        files: qx-${{ steps.extract_version.outputs.version }}-checksums.txt
