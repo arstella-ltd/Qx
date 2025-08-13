@@ -30,8 +30,9 @@ internal interface IOpenAIService
     /// <param name="model">The model to use</param>
     /// <param name="temperature">Temperature for response generation</param>
     /// <param name="maxTokens">Maximum tokens for the response</param>
+    /// <param name="enableWebSearch">Whether to enable web search tool</param>
     /// <returns>The response from OpenAI</returns>
-    Task<string> GetCompletionAsync(string prompt, string model, double temperature, int maxTokens);
+    Task<string> GetCompletionAsync(string prompt, string model, double temperature, int maxTokens, bool enableWebSearch = false);
 }
 
 /// <summary>

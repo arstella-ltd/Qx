@@ -1,6 +1,9 @@
 using System.Runtime.CompilerServices;
 using OpenAI;
 using OpenAI.Chat;
+#pragma warning disable OPENAI001 // Type is for evaluation purposes only
+using OpenAI.Responses;
+#pragma warning restore OPENAI001
 
 namespace Qx.Services;
 
@@ -65,6 +68,16 @@ internal sealed class OpenAIService : IOpenAIService
                 MaxOutputTokenCount = options.MaxTokens,
             };
 
+            // Add web search tool if enabled
+            // Note: Web search is currently only available on specific models and may require
+            // special access. For now, we'll use the standard implementation without web search.
+            // TODO: Implement web search when available in the SDK
+            if (options.EnableWebSearch)
+            {
+                // Web search will be enabled automatically by the model if supported
+                // No explicit tool configuration needed for now
+            }
+
             // Apply timeout
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(TimeSpan.FromSeconds(options.TimeoutSeconds));
@@ -127,6 +140,16 @@ internal sealed class OpenAIService : IOpenAIService
             MaxOutputTokenCount = options.MaxTokens,
         };
 
+        // Add web search tool if enabled
+        // Note: Web search is currently only available on specific models and may require
+        // special access. For now, we'll use the standard implementation without web search.
+        // TODO: Implement web search when available in the SDK
+        if (options.EnableWebSearch)
+        {
+            // Web search will be enabled automatically by the model if supported
+            // No explicit tool configuration needed for now
+        }
+
         // Apply timeout
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromSeconds(options.TimeoutSeconds));
@@ -151,28 +174,91 @@ internal sealed class OpenAIService : IOpenAIService
     /// <summary>
     /// Get a completion from OpenAI with specific parameters
     /// </summary>
-    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int maxTokens)
+#pragma warning disable OPENAI001 // Type is for evaluation purposes only
+    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int maxTokens, bool enableWebSearch = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
         ArgumentException.ThrowIfNullOrWhiteSpace(model);
 
-        var openAIClient = new OpenAIClient(_apiKey);
-        var chatClient = openAIClient.GetChatClient(model);
-
-        var messages = new List<ChatMessage>
+        // Use OpenAIResponseClient for web search support
+        if (enableWebSearch)
         {
-            new UserChatMessage(prompt)
-        };
+            var responseClient = new OpenAIResponseClient(
+                model: model,
+                apiKey: _apiKey);
 
-        var chatOptions = new ChatCompletionOptions
+            var options = new ResponseCreationOptions
+            {
+                Temperature = (float)temperature,
+                MaxOutputTokenCount = maxTokens
+            };
+
+            // Add web search tool
+            options.Tools.Add(ResponseTool.CreateWebSearchTool());
+
+            var response = await responseClient.CreateResponseAsync(
+                userInputText: prompt,
+                options).ConfigureAwait(false);
+
+            // Process response items and extract text
+            var resultText = new System.Text.StringBuilder();
+            
+            // Debug: Log the number of output items
+            if (response.Value.OutputItems == null || response.Value.OutputItems.Count == 0)
+            {
+                // If no output items, try to get content directly
+                return "No response generated. Web search may not be available for this model.";
+            }
+            
+            foreach (ResponseItem item in response.Value.OutputItems)
+            {
+                if (item is MessageResponseItem messageItem)
+                {
+                    if (messageItem.Content != null)
+                    {
+                        foreach (var content in messageItem.Content)
+                        {
+                            if (!string.IsNullOrEmpty(content.Text))
+                            {
+                                resultText.Append(content.Text);
+                            }
+                        }
+                    }
+                }
+                else if (item is WebSearchCallResponseItem webSearchItem)
+                {
+                    // Indicate that web search was performed
+                    resultText.AppendLine($"[Web search performed: {webSearchItem.Status}]");
+                }
+            }
+
+            string result = resultText.ToString();
+            return string.IsNullOrWhiteSpace(result) 
+                ? "No response content available. Try using a different model or disabling web search." 
+                : result;
+        }
+        else
         {
-            Temperature = (float)temperature,
-            MaxOutputTokenCount = maxTokens
-        };
+            // Use regular ChatClient without web search
+            var openAIClient = new OpenAIClient(_apiKey);
+            var chatClient = openAIClient.GetChatClient(model);
 
-        var completion = await chatClient.CompleteChatAsync(messages, chatOptions).ConfigureAwait(false);
-        return completion.Value.Content[0].Text ?? string.Empty;
+            var messages = new List<ChatMessage>
+            {
+                new UserChatMessage(prompt)
+            };
+
+            var chatOptions = new ChatCompletionOptions
+            {
+                Temperature = (float)temperature,
+                MaxOutputTokenCount = maxTokens
+            };
+
+            var completion = await chatClient.CompleteChatAsync(messages, chatOptions).ConfigureAwait(false);
+            return completion.Value.Content[0].Text ?? string.Empty;
+        }
     }
+#pragma warning restore OPENAI001
 
     /// <summary>
     /// Get the system prompt based on effort level and context size

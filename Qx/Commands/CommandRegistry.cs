@@ -44,6 +44,17 @@ internal static class CommandRegistry
             Description = "Maximum number of tokens in the response"
         };
         
+        var webSearchOption = new Option<bool>("--web-search")
+        {
+            Description = "Enable web search for more comprehensive answers"
+        };
+        webSearchOption.Aliases.Add("-w");
+        
+        var noWebSearchOption = new Option<bool>("--no-web-search")
+        {
+            Description = "Disable web search (use model knowledge only)"
+        };
+        
         var versionOption = new Option<bool>("--version")
         {
             Description = "Show version information"
@@ -55,6 +66,8 @@ internal static class CommandRegistry
         rootCommand.Options.Add(outputOption);
         rootCommand.Options.Add(temperatureOption);
         rootCommand.Options.Add(maxTokensOption);
+        rootCommand.Options.Add(webSearchOption);
+        rootCommand.Options.Add(noWebSearchOption);
         rootCommand.Options.Add(versionOption);
         
         // Set handler for the root command
@@ -82,6 +95,8 @@ internal static class CommandRegistry
                 Console.WriteLine("  -o, --output <output>        Output file path");
                 Console.WriteLine("  -t, --temperature <temperature>  Temperature for response generation (0.0 to 2.0) [default: 1]");
                 Console.WriteLine("  --max-tokens <max-tokens>    Maximum number of tokens in the response [default: 1000]");
+                Console.WriteLine("  -w, --web-search             Enable web search for more comprehensive answers [default: enabled]");
+                Console.WriteLine("  --no-web-search              Disable web search (use model knowledge only)");
                 Console.WriteLine("  --version                    Show version information");
                 Console.WriteLine("  -h, --help                   Show help and usage information");
                 return 0;
@@ -101,13 +116,21 @@ internal static class CommandRegistry
                 maxTokens = 1000;
             }
             
+            // Determine web search setting
+            bool enableWebSearch = !parseResult.GetValue(noWebSearchOption);
+            if (parseResult.GetValue(webSearchOption))
+            {
+                enableWebSearch = true;
+            }
+            
             var handler = new QueryCommandHandler(openAIService);
             Task.Run(async () => await handler.HandleAsync(
                 new[] { prompt }, 
                 model, 
                 output, 
                 temperature, 
-                maxTokens).ConfigureAwait(false)
+                maxTokens,
+                enableWebSearch).ConfigureAwait(false)
             ).GetAwaiter().GetResult();
             
             return 0;
