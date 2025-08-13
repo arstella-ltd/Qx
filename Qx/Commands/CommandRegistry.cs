@@ -2,6 +2,7 @@ using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Qx.Handlers;
 using Qx.Services;
+using Qx.Models;
 
 namespace Qx.Commands;
 
@@ -12,6 +13,7 @@ internal static class CommandRegistry
         var rootCommand = new RootCommand("Qx - Query eXpress: OpenAI-powered intelligent CLI tool for developers");
 
         var openAIService = serviceProvider.GetRequiredService<IOpenAIService>();
+        var licenseHelper = serviceProvider.GetRequiredService<ILicenseHelper>();
 
         // Main prompt argument for direct usage: qx "prompt"
         var promptArgument = new Argument<string>("prompt")
@@ -77,6 +79,11 @@ internal static class CommandRegistry
             Description = "Show version information"
         };
 
+        var licenseOption = new Option<bool>("--license")
+        {
+            Description = "Show license information"
+        };
+
         // Add argument and options to root command
         rootCommand.Arguments.Add(promptArgument);
         rootCommand.Options.Add(modelOption);
@@ -89,6 +96,7 @@ internal static class CommandRegistry
         rootCommand.Options.Add(noFunctionsOption);
         rootCommand.Options.Add(verboseOption);
         rootCommand.Options.Add(versionOption);
+        rootCommand.Options.Add(licenseOption);
 
         // Set handler for the root command
         rootCommand.SetAction((parseResult) =>
@@ -96,8 +104,43 @@ internal static class CommandRegistry
             // Handle version flag
             if (parseResult.GetValue(versionOption))
             {
-                Console.WriteLine("qx version 0.1.0-alpha");
-                Console.WriteLine("Copyright © 2025 Qx Development Team");
+                Console.WriteLine("qx version 0.1.0");
+                Console.WriteLine("Copyright (c) 2025 Arstella Ltd.");
+                return 0;
+            }
+
+            // Handle license flag
+            if (parseResult.GetValue(licenseOption))
+            {
+                var licenses = Task.Run(async () => await licenseHelper.GetLicenseInfoAsync().ConfigureAwait(false)).GetAwaiter().GetResult();
+
+                // Display main license info
+                Console.WriteLine("\n========================================");
+                Console.WriteLine("License Information");
+                Console.WriteLine("========================================");
+                Console.WriteLine($"\n{licenses["Qx"].Name} - {licenses["Qx"].License.Split('\n')[0]}");
+                Console.WriteLine("Copyright (c) 2025 Arstella Ltd.");
+                Console.WriteLine();
+
+                // Display third-party licenses
+                Console.WriteLine("Third-party Dependencies:");
+                Console.WriteLine("----------------------------------------");
+                
+                // Calculate max lengths for formatting
+                var thirdPartyLicenses = licenses.Where(l => l.Key != "Qx").ToList();
+                int maxNameLength = thirdPartyLicenses.Max(l => l.Value.Name.Length);
+                int maxVersionLength = thirdPartyLicenses.Max(l => l.Value.Version.Length);
+                int maxLicenseLength = thirdPartyLicenses.Max(l => l.Value.License.Split('\n')[0].Length);
+                
+                Console.WriteLine($"{"Library".PadRight(maxNameLength + 2)}{"Version".PadRight(maxVersionLength + 2)}{"License".PadRight(maxLicenseLength + 2)}Project URL");
+                Console.WriteLine(new string('-', maxNameLength + maxVersionLength + maxLicenseLength + 50));
+
+                foreach (var license in thirdPartyLicenses)
+                {
+                    Console.WriteLine($"{license.Value.Name.PadRight(maxNameLength + 2)}{license.Value.Version.PadRight(maxVersionLength + 2)}{license.Value.License.Split('\n')[0].PadRight(maxLicenseLength + 2)}{license.Value.ProjectUrl}");
+                }
+
+                Console.WriteLine("\nSee THIRD-PARTY-NOTICES.txt for full license texts.");
                 return 0;
             }
 
@@ -148,6 +191,7 @@ internal static class CommandRegistry
                 Console.WriteLine("  --no-functions               Disable function calling");
                 Console.WriteLine("  -v, --verbose                Show detailed response information in JSON format");
                 Console.WriteLine("  --version                    Show version information");
+                Console.WriteLine("  --license                    Show license information");
                 Console.WriteLine("  -h, --help                   Show help and usage information");
                 return 0;
             }
