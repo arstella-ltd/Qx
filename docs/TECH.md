@@ -70,6 +70,128 @@ dotnet run -- "your query here"
 | QX_TIMEOUT | ❌ | APIタイムアウト（秒） | 60 |
 | QX_DEBUG | ❌ | デバッグモード | false |
 
+## ⚠️ System.CommandLine 注意事項
+
+### API設計の重要ポイント
+
+System.CommandLine は現在ベータ版（v2.0.0-beta6）のため、以下の点に注意が必要：
+
+#### 1. Option コンストラクタのオーバーロード
+
+```csharp
+// ❌ 誤り：名前付きパラメータは使用できない
+var option = new Option<string>(
+    name: "--model",
+    getDefaultValue: () => "gpt-3.5-turbo",
+    description: "Model to use");
+
+// ✅ 正しい：順序を守った引数
+var option = new Option<string>(
+    new[] { "--model", "-m" },
+    () => "gpt-3.5-turbo",
+    "Model to use");
+
+// ✅ またはプロパティ初期化子を使用
+var option = new Option<string>("--model")
+{
+    Description = "Model to use"
+};
+```
+
+#### 2. SetAction vs SetHandler
+
+```csharp
+// SetAction: 同期処理、ParseResultを受け取る
+command.SetAction((parseResult) => 
+{
+    // 同期処理のみ
+    return 0;
+});
+
+// SetHandler: 型安全なパラメータバインディング（推奨）
+command.SetHandler(
+    async (string arg1, int arg2) => 
+    {
+        // 非同期処理可能
+    },
+    argument1,
+    option2);
+```
+
+#### 3. 非同期処理の扱い
+
+```csharp
+// ❌ 誤り：SetActionは非同期ラムダを直接サポートしない
+command.SetAction(async (parseResult) => 
+{
+    await SomeAsyncMethod();
+    return 0; // コンパイルエラー
+});
+
+// ✅ 正しい：Task.Runで包む
+command.SetAction((parseResult) => 
+{
+    Task.Run(async () => await handler.HandleAsync())
+        .GetAwaiter().GetResult();
+    return 0;
+});
+```
+
+#### 4. Arguments と Options の追加
+
+```csharp
+// Command クラスのプロパティを使用
+command.Arguments.Add(argument);  // Arguments コレクション
+command.Options.Add(option);      // Options コレクション
+
+// 注意：AddArgument/AddOption メソッドは存在しない
+```
+
+#### 5. デフォルト値の設定
+
+```csharp
+// Option<T> のデフォルト値は型によって異なる動作
+// string: null, int: 0, bool: false
+
+// 明示的にデフォルト値を確認
+if (temperature == 0) // double型のデフォルト
+{
+    temperature = 0.7;
+}
+```
+
+#### 6. RootCommand の実行
+
+```csharp
+// ❌ 誤り：Invoke メソッドは直接存在しない
+rootCommand.Invoke(args);
+
+// ✅ 正しい：Parse してから Invoke
+rootCommand.Parse(args).Invoke();
+
+// または CommandLineBuilder を使用（より柔軟）
+new CommandLineBuilder(rootCommand)
+    .UseDefaults()
+    .Build()
+    .Invoke(args);
+```
+
+### 移行時の注意事項
+
+System.CommandLine は正式版リリース時に API が変更される可能性があります：
+
+1. **破壊的変更の可能性**: ベータ版のため、メジャーアップデート時は要注意
+2. **ドキュメント不足**: 公式ドキュメントが不完全な箇所がある
+3. **パフォーマンス**: AoT コンパイル時のリフレクション使用に注意
+4. **依存性注入**: 標準的なDIコンテナとの統合は手動実装が必要
+
+### 推奨プラクティス
+
+1. **コマンドの分離**: 各コマンドを独立したクラスに実装
+2. **ハンドラーパターン**: ビジネスロジックをハンドラーに分離
+3. **DIコンテナ統合**: ServiceProviderを使用した依存性注入
+4. **エラーハンドリング**: 終了コードを適切に設定
+
 ## 🔨 ビルド・デプロイ
 
 ### ローカルビルド
