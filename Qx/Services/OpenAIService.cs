@@ -38,7 +38,7 @@ internal sealed class OpenAIService : IOpenAIService
     /// Get a completion from OpenAI with specific parameters
     /// </summary>
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only
-    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false)
+    public async Task<string> GetCompletionAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false, string? searchContextSize = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
         ArgumentException.ThrowIfNullOrWhiteSpace(model);
@@ -58,6 +58,14 @@ internal sealed class OpenAIService : IOpenAIService
         // Add web search tool
         if (enableWebSearch)
         {
+            // TODO: When the OpenAI API supports search_context_size parameter,
+            // use searchContextSize to configure the web search tool.
+            // For now, we'll use the default behavior.
+            // Example future implementation:
+            // if (!string.IsNullOrEmpty(searchContextSize))
+            // {
+            //     options.SearchContextSize = searchContextSize;
+            // }
             options.Tools.Add(ResponseTool.CreateWebSearchTool());
         }
 
@@ -154,7 +162,7 @@ internal sealed class OpenAIService : IOpenAIService
     /// Get a completion from OpenAI with detailed response information
     /// </summary>
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only
-    public async Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false)
+    public async Task<(string response, ResponseDetails? details)> GetCompletionWithDetailsAsync(string prompt, string model, double temperature, int? maxTokens, bool enableWebSearch = false, bool enableFunctionCalling = false, bool showFunctionCalls = false, string? searchContextSize = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
         ArgumentException.ThrowIfNullOrWhiteSpace(model);
@@ -174,6 +182,14 @@ internal sealed class OpenAIService : IOpenAIService
         // Add web search tool
         if (enableWebSearch)
         {
+            // TODO: When the OpenAI API supports search_context_size parameter,
+            // use searchContextSize to configure the web search tool.
+            // For now, we'll use the default behavior.
+            // Example future implementation:
+            // if (!string.IsNullOrEmpty(searchContextSize))
+            // {
+            //     options.SearchContextSize = searchContextSize;
+            // }
             options.Tools.Add(ResponseTool.CreateWebSearchTool());
         }
 

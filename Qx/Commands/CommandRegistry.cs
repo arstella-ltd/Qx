@@ -68,6 +68,12 @@ internal static class CommandRegistry
             Description = "Disable function calling"
         };
 
+        var searchContextSizeOption = new Option<string>("--search-context-size")
+        {
+            Description = "Context size for web search (low, medium, high)"
+        };
+        searchContextSizeOption.Aliases.Add("-s");
+
         var verboseOption = new Option<bool>("--verbose")
         {
             Description = "Show detailed response information in JSON format"
@@ -92,6 +98,7 @@ internal static class CommandRegistry
         rootCommand.Options.Add(maxTokensOption);
         rootCommand.Options.Add(webSearchOption);
         rootCommand.Options.Add(noWebSearchOption);
+        rootCommand.Options.Add(searchContextSizeOption);
         rootCommand.Options.Add(functionsOption);
         rootCommand.Options.Add(noFunctionsOption);
         rootCommand.Options.Add(verboseOption);
@@ -184,6 +191,7 @@ internal static class CommandRegistry
                 Console.WriteLine("  --max-tokens <max-tokens>    Maximum number of tokens in the response (unlimited if not specified)");
                 Console.WriteLine("  -w, --web-search             Enable web search for more comprehensive answers [default: enabled]");
                 Console.WriteLine("  --no-web-search              Disable web search (use model knowledge only)");
+                Console.WriteLine("  -s, --search-context-size <size>  Context size for web search (low, medium, high) [default: medium]");
                 Console.WriteLine("  -f, --functions              Enable function calling (GetCurrentTime, GetWeather, CalculateExpression) [default: enabled]");
                 Console.WriteLine("  --no-functions               Disable function calling");
                 Console.WriteLine("  -v, --verbose                Show detailed response information in JSON format");
@@ -218,6 +226,14 @@ internal static class CommandRegistry
             }
 
             bool verbose = parseResult.GetValue(verboseOption);
+            string? searchContextSize = parseResult.GetValue(searchContextSizeOption);
+
+            // Validate search context size
+            if (!string.IsNullOrEmpty(searchContextSize) && !new[] { "low", "medium", "high" }.Contains(searchContextSize))
+            {
+                Console.Error.WriteLine($"Error: Invalid search-context-size value '{searchContextSize}'. Must be 'low', 'medium', or 'high'.");
+                return 1;
+            }
 
             var handler = new QueryCommandHandler(openAIService);
             Task.Run(async () => await handler.HandleAsync(
@@ -228,7 +244,8 @@ internal static class CommandRegistry
                 maxTokens,
                 enableWebSearch,
                 enableFunctionCalling,
-                verbose).ConfigureAwait(false)
+                verbose,
+                searchContextSize).ConfigureAwait(false)
             ).GetAwaiter().GetResult();
 
             return 0;
