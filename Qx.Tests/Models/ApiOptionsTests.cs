@@ -242,13 +242,13 @@ public class ApiOptionsTests
         options.DefaultEffort.Should().Be(EffortLevel.Medium);
         options.DefaultContext.Should().Be(ContextSize.Medium);
         options.DefaultTimeout.Should().Be(TimeSpan.FromSeconds(60));
-        options.DefaultModel.Should().Be("gpt-3.5-turbo");
+        options.DefaultModel.Should().Be("gpt-5");
         options.DefaultTemperature.Should().Be(0.7);
         options.DefaultMaxTokens.Should().Be(1000);
         options.EnableWebSearchByDefault.Should().BeTrue();
         options.StreamResponsesByDefault.Should().BeTrue();
         options.SystemPrompt.Should().BeNull();
-        options.AllowedModels.Should().Contain(new[] { "gpt-3.5-turbo", "gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini" });
+        options.AllowedModels.Should().Contain(new[] { "gpt-5", "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo" });
         options.CustomHeaders.Should().BeEmpty();
         options.RateLimitPerMinute.Should().Be(60);
         options.TokenLimitPerMinute.Should().Be(90000);

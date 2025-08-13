@@ -32,7 +32,7 @@ internal sealed class Query
     /// <summary>
     /// Gets or sets the model to use for the query.
     /// </summary>
-    public string Model { get; set; } = "gpt-3.5-turbo";
+    public string Model { get; set; } = "gpt-5";
 
     /// <summary>
     /// Gets or sets the temperature for response generation.

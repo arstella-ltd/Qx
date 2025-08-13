@@ -41,7 +41,7 @@ public class QueryTests
         query.ReasoningEffort.Should().Be(EffortLevel.Medium);
         query.SearchContext.Should().Be(ContextSize.Medium);
         query.Timeout.Should().Be(TimeSpan.FromSeconds(60));
-        query.Model.Should().Be("gpt-3.5-turbo");
+        query.Model.Should().Be("gpt-5");
         query.Temperature.Should().Be(0.7);
         query.MaxTokens.Should().Be(1000);
         query.EnableWebSearch.Should().BeTrue();
