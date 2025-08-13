@@ -15,7 +15,7 @@ internal sealed class QueryCommandHandler
         _openAIService = openAIService ?? throw new ArgumentNullException(nameof(openAIService));
     }
 
-    public async Task<int> HandleAsync(string[] promptParts, string model, string? outputPath, double temperature, int? maxTokens, bool enableWebSearch = true, bool enableFunctionCalling = true, bool verbose = false)
+    public async Task<int> HandleAsync(string[] promptParts, string model, string? outputPath, double temperature, int? maxTokens, bool enableWebSearch = true, bool enableFunctionCalling = true, bool verbose = false, string? searchContextSize = null)
     {
         string prompt = string.Join(" ", promptParts ?? Array.Empty<string>());
 
@@ -52,7 +52,8 @@ internal sealed class QueryCommandHandler
                 maxTokens,
                 enableWebSearch,
                 enableFunctionCalling,
-                verbose).ConfigureAwait(false);
+                verbose,
+                searchContextSize).ConfigureAwait(false);
 
             // Show verbose output if requested
             if (verbose && responseDetails != null)
