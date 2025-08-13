@@ -109,8 +109,14 @@ internal class LicenseHelper : ILicenseHelper
             Version? version = assembly.GetName().Version;
             return version?.ToString(3) ?? "0.1.0";
         }
-        catch
+        catch (NotSupportedException)
         {
+            // Can occur in certain runtime environments
+            return "0.1.0";
+        }
+        catch (System.Security.SecurityException)
+        {
+            // Can occur if permission to access assembly info is denied
             return "0.1.0";
         }
     }
@@ -148,18 +154,29 @@ internal class LicenseHelper : ILicenseHelper
 
             return dependencies;
         }
-        catch
+        catch (NotSupportedException)
         {
-            return new Dictionary<string, string>
-            {
-                { "OpenAI", "MIT" },
-                { "System.CommandLine", "MIT" },
-                { "Microsoft.Extensions.Configuration", "MIT" },
-                { "Microsoft.Extensions.Configuration.EnvironmentVariables", "MIT" },
-                { "Microsoft.Extensions.Configuration.Json", "MIT" },
-                { "Microsoft.Extensions.DependencyInjection", "MIT" }
-            };
+            // Can occur in certain runtime environments
+            return GetDefaultDependencies();
         }
+        catch (System.Security.SecurityException)
+        {
+            // Can occur if permission to access assembly info is denied
+            return GetDefaultDependencies();
+        }
+    }
+
+    private static Dictionary<string, string> GetDefaultDependencies()
+    {
+        return new Dictionary<string, string>
+        {
+            { "OpenAI", "MIT" },
+            { "System.CommandLine", "MIT" },
+            { "Microsoft.Extensions.Configuration", "MIT" },
+            { "Microsoft.Extensions.Configuration.EnvironmentVariables", "MIT" },
+            { "Microsoft.Extensions.Configuration.Json", "MIT" },
+            { "Microsoft.Extensions.DependencyInjection", "MIT" }
+        };
     }
 
     private static string GenerateNoticesContent()

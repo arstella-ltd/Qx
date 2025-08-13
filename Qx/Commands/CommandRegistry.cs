@@ -8,6 +8,8 @@ namespace Qx.Commands;
 
 internal static class CommandRegistry
 {
+    private static readonly string[] ValidSearchContextSizes = { "low", "medium", "high" };
+
     public static RootCommand CreateRootCommand(IServiceProvider serviceProvider)
     {
         var rootCommand = new RootCommand("Qx - Query eXpress: OpenAI-powered intelligent CLI tool for developers");
@@ -229,7 +231,7 @@ internal static class CommandRegistry
             string? searchContextSize = parseResult.GetValue(searchContextSizeOption);
 
             // Validate search context size
-            if (!string.IsNullOrEmpty(searchContextSize) && !new[] { "low", "medium", "high" }.Contains(searchContextSize))
+            if (!string.IsNullOrEmpty(searchContextSize) && !ValidSearchContextSizes.Contains(searchContextSize))
             {
                 Console.Error.WriteLine($"Error: Invalid search-context-size value '{searchContextSize}'. Must be 'low', 'medium', or 'high'.");
                 return 1;
