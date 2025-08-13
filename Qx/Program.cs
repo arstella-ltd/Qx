@@ -16,8 +16,8 @@ internal sealed class Program
     {
         // Check if only help, version, or license is requested (no actual query)
         bool isHelpOrVersionOrLicense = args.Length == 0 ||
-                              (args.Length > 0 && (args[0] == "--help" || args[0] == "-h" || 
-                               args[0] == "--version" || args[0] == "version" || 
+                              (args.Length > 0 && (args[0] == "--help" || args[0] == "-h" ||
+                               args[0] == "--version" || args[0] == "version" ||
                                args[0] == "--license"));
 
         string? apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");

@@ -1,8 +1,8 @@
 using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Qx.Handlers;
-using Qx.Services;
 using Qx.Models;
+using Qx.Services;
 
 namespace Qx.Commands;
 
@@ -122,13 +122,13 @@ internal static class CommandRegistry
                 // Display third-party licenses
                 Console.WriteLine("Third-party Dependencies:");
                 Console.WriteLine("----------------------------------------");
-                
+
                 // Calculate max lengths for formatting
                 var thirdPartyLicenses = licenses.Where(l => l.Key != "Qx").ToList();
                 int maxNameLength = thirdPartyLicenses.Max(l => l.Value.Name.Length);
                 int maxVersionLength = thirdPartyLicenses.Max(l => l.Value.Version.Length);
                 int maxLicenseLength = thirdPartyLicenses.Max(l => l.Value.License.Split('\n')[0].Length);
-                
+
                 Console.WriteLine($"{"Library".PadRight(maxNameLength + 2)}{"Version".PadRight(maxVersionLength + 2)}{"License".PadRight(maxLicenseLength + 2)}Project URL");
                 Console.WriteLine(new string('-', maxNameLength + maxVersionLength + maxLicenseLength + 50));
 
