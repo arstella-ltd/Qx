@@ -96,6 +96,10 @@ coverage*.info
 *.coverage
 *.coveragexml
 
+# Test Results
+TestResults/
+test-results.trx
+
 # NCrunch
 _NCrunch_*
 .*crunch*.local.xml
